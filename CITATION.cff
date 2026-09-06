@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it."
+title: "The Fermion Sign Problem, Read Before the Censoring"
+abstract: "The average sign is a censored measurement: it applies sign() to a determinantal weight spanning orders of magnitude, and where the weight's two factors are locked it returns exactly 1 with no gradient at all. The Entroptics coupling read is taken on the continuous quantity before that censoring -- the particle-hole relation between the two spin channels -- which is exact at half filling, degrades measurably under doping while the average sign is still identically 1, and resolves at 135 sigma against the instrument's own exact null. The repository holds the paper, the reads, and the determinantal quantum Monte Carlo machinery they run on."
+type: software
+authors:
+  - given-names: Ikailo John
+    family-names: Sessford
+    email: john@ikailo.com
+    affiliation: Ikailo
+repository-code: "https://github.com/Agience/entroptics-sign-problem"
+url: "https://github.com/Agience/entroptics-sign-problem"
+license: Apache-2.0
+version: 0.1.0
+date-released: "2026-09-06"
+keywords:
+  - fermion sign problem
+  - determinantal quantum Monte Carlo
+  - Hubbard model
+  - strongly correlated electrons
+  - constrained path
+  - complex Langevin
+references:
+  - type: software
+    title: "Entroptics"
+    abstract: "Read any 2-D signal as a finite optical aperture whose resolution is fixed by the signal's own entropy."
+    authors:
+      - given-names: Ikailo John
+        family-names: Sessford
+        affiliation: Ikailo
+    version: v0.2.1
+    doi: "10.5281/zenodo.22243130"
+    url: "https://zenodo.org/records/22243130"
+    repository-code: "https://github.com/Agience/entroptics"
+    license: Apache-2.0
+    date-released: "2026-08-18"
