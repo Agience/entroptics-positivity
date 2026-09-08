@@ -2,7 +2,8 @@
 
 The route, and why it is this one.  `expKK` showed the prize: four to six non-orthogonal
 determinants cut the constrained-path bias by 3 to 9x.  Every determinant that achieved it was
-fitted to the exact ground state.  Two honest generators were then measured by their variational
+fitted to the exact ground state.  Two generators that never see it were then measured by their
+variational
 bound, which costs nothing and needs no exact answer:
 
     free determinant                        0.000 of the correlation energy
@@ -45,7 +46,7 @@ from sector_ed import ground_energy
 from trial import free_trial
 from noci import noci
 from cpmc_multi import MultiCPMC, run_multi
-from expLL_honest_trial import distinct
+from expLL_unfitted_trial import distinct
 
 
 def harvest(m, n_up, n_dn, dets, coeffs, k, *, n_walkers=64, beta=6.0, seed=0):
@@ -106,5 +107,6 @@ if __name__ == "__main__":
             dets = distinct(dets + w)[:K_BASIS]
             _, c = noci(dets, m.K, U)
     print()
-    print("'vs free det' below 1 is the honest construction beating CPMC's default trial.")
+    print("'vs free det' below 1 is this construction beating CPMC's default trial without ever")
+    print("seeing the ground state.")
     print("A bound marked BELOW would mean the matrix elements are wrong and the row means nothing.")

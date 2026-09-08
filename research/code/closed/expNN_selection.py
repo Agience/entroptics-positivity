@@ -40,7 +40,7 @@ from trial import free_trial, _det_amplitudes
 from noci import noci
 from cpmc_multi import run_multi
 from expMM_self_consistent import harvest
-from expLL_honest_trial import build_basis, distinct
+from expLL_unfitted_trial import build_basis, distinct
 from expGG_nonorthogonal import best_k_dets
 
 
@@ -117,6 +117,14 @@ if __name__ == "__main__":
     print()
     print("=" * 112)
     b = np.array([abs(r["bias"]) for r in rows])
+    # READ THE CPMC-ENERGY ROW AS A TAUTOLOGY WHERE IT IS ONE.  `bias = E_cpmc - E_exact`, so when
+    # every candidate's bias carries the SAME SIGN -- as all nine do here, all positive -- ranking
+    # by `E_cpmc` and ranking by `|bias|` are the same ranking, and Spearman must return exactly
+    # 1.000 with `picks the best? YES`.  That is arithmetic, not a working selection criterion, and
+    # it says nothing about whether minimising the CPMC energy would choose well in general (the
+    # constrained path is not variational, so a negative bias breaks it).  The row is flagged in
+    # the output so it cannot be quoted as a criterion that works.  The claim S8.6 makes is about
+    # the NOCI bound, which is answer-free and anti-correlated.
     print(f"{'criterion':>14} {'Spearman vs |bias|':>19} {'p':>8} {'picks the best?':>16}")
     best = int(np.argmin(b))
     for label, key, sign in (("NOCI bound", "noci", +1), ("CPMC energy", "cpmc", +1),
@@ -124,8 +132,11 @@ if __name__ == "__main__":
         v = np.array([r[key] for r in rows]) * sign
         rho, p = spearmanr(v, b)
         pick = int(np.argmin(v))
+        note = ""
+        if key == "cpmc" and (np.sign([r["bias"] for r in rows]) == np.sign(rows[0]["bias"])).all():
+            note = "  <- TAUTOLOGY, not a criterion"
         print(f"{label:>14} {rho:19.3f} {p:8.4f} "
-              f"{('YES' if pick == best else rows[pick]['name'][:16]):>16}")
+              f"{('YES' if pick == best else rows[pick]['name'][:16]):>16}{note}")
     print()
     print(f"best answer-free candidate: {rows[best]['name']} at bias {rows[best]['bias']:+.5f}")
     print(f"free determinant baseline:  {rows[0]['bias']:+.5f}")

@@ -74,6 +74,10 @@ if __name__ == "__main__":
 
     print()
     print("=" * 112)
+    # A HAND-CHOSEN CUT, AND THEREFORE NOT QUOTABLE. 20 is picked, not derived, and it decides
+    # which rows the rank correlation below is computed on. Nothing in the paper leans on that
+    # correlation and nothing should without first showing it survives moving the cut. Same
+    # defect as the selection in expQQ and the verdict in expRR, marked the same way.
     live = [r for r in rows if r["ess"] > 20]
     dead = [r for r in rows if r["ess"] <= 20]
     print(f"rows where <sgn> is actually resolvable (ESS > 20): {len(live)} of {len(rows)}")

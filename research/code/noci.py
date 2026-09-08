@@ -2,7 +2,7 @@
 
 `expKK` measured the ceiling -- four to six non-orthogonal determinants cut the constrained-path
 bias by 3 to 9x -- using determinants fitted to the exact ground state, which nobody has.  This is
-the machinery for getting comparable ones honestly.
+the machinery for getting comparable ones without it.
 
 Two halves, and neither needs exact diagonalisation:
 

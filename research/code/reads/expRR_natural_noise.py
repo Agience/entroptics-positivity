@@ -82,15 +82,24 @@ if __name__ == "__main__":
             W = blocks(m, 24, per_block, seed=int(beta * 10 + mu * 10 + per_block))
             sk = float(np.abs(skew(W, axis=0)).mean())
             ku = float(np.abs(kurtosis(W, axis=0)).mean())
+            # CHOSEN CONSTANTS, so this column is descriptive and NOT QUOTABLE: 0.5 and 1.0
+            # are picked rather than derived, and they decide a yes/no verdict.  The skew and
+            # kurtosis themselves are measurements and are printed beside it; read those.
             natural = "yes" if (sk < 0.5 and ku < 1.0) else "NO"
             raw = W.mean(axis=0)
-            ap = E.aperture(W)
-            clean = np.asarray(ap.extract().clean)
-            # extract returns whitened screen units; put it back on the data's own scale
-            mu_c = W.mean(axis=0, keepdims=True)
-            sd_c = W.std(axis=0, keepdims=True)
-            sd_k = clean.std(axis=0, keepdims=True)
-            rec = mu_c + clean * np.where(sd_k > 0, sd_c / np.where(sd_k > 0, sd_k, 1.0), 0.0)
+            # `E.aperture` is the MODULE; `E.Aperture` is the class. This line read the module and
+            # raised `'module' object is not callable`, so this file could not run at all against
+            # the current library -- found 2026-09-07, while re-measuring the figure S8.7 quotes
+            # from it. Nothing gates this experiment, which is why it went unnoticed.
+            ap = E.Aperture(W)
+            clean, info = ap.extract()
+            clean = np.asarray(clean)
+            # NO RESCALING. `extract` returns `(clean, info)` with `clean` in W's OWN units, and
+            # `clean.mean(axis=0)` IS `info['centre']` -- verified 2026-09-07. The line that used
+            # to stand here re-centred and re-scaled by hand, on a comment saying extract returned
+            # "whitened screen units". That was true of an older library and is not true now, so
+            # the rescaling was a second transformation applied on top of a correct one.
+            rec = clean
             e_raw = float(np.sqrt(np.mean((raw - truth) ** 2)))
             e_ext = float(np.sqrt(np.mean((rec.mean(axis=0) - truth) ** 2)))
             print(f"{per_block:10d} {24:7d} {sk:8.3f} {ku:10.3f} {natural:>8} "

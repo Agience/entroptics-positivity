@@ -1,0 +1,89 @@
+{
+  "what": "S8.6's fitted multi-determinant ceiling: CPMC bias against exact, per (U, k).",
+  "why_recorded": "The measurement costs 73 minutes and cannot be made cheaper. At n_walkers=120 the error bar at U=4,k=1 grows from 0.00028 to 0.00877 -- a factor of 31 for a 3.3x reduction in walkers, where square-root scaling predicts 1.8x -- and the bias at U=4,k=4 crosses zero, which makes every ratio built on it meaningless. The estimate of the error is heavy-tailed at low statistics, the same behaviour S8.5 measures in complex Langevin. So there is no cheap version of this ground truth, and it is recorded rather than recomputed on every run.",
+  "measured_on": "2026-09-08",
+  "measured_by": "closed/expKK_multidet_bias.py",
+  "regenerate_with": "cd research/code && PYTHONPATH=.:closed python tests/test_multidet_ceiling.py   (add --refit to rebuild the determinant fits). NOT 'python -m tests.\u2026': an installed package named 'tests' shadows this directory and the -m form silently runs that instead.",
+  "parameters": {
+    "lattice": "2x4",
+    "filling": [
+      3,
+      3
+    ],
+    "beta": 8.0,
+    "dtau": 0.05,
+    "n_walkers": 400,
+    "n_meas": 150,
+    "seeds": [
+      1,
+      2,
+      3
+    ],
+    "n_restarts": 4,
+    "fit_seed": 1
+  },
+  "uncertainty": "se of the mean across the three seeds -- the seed spread, not a within-run formula. S8.5 measures those differing by a factor of 10 to 19 on this rig where runaways are present.",
+  "fit_is_irreproducible_across_processes": "MEASURED 2026-09-08. best_k_dets is bit-exact within one process (max|det diff| = 0 at k = 1, 2, 4) and does NOT reproduce across processes: the same call at U = 8, k = 2 returns overlaps spanning 1.7e-7 over three runs, and pinning OMP/MKL/OpenBLAS to one thread only halves that to 9.9e-8. A 1e-7 shift in a non-convex optimum moves the bias by more than the walker seed spread -- three independent runs of U = 8, k = 4 give 0.02912, 0.03001, 0.03251 against a quoted se near 0.0027. The 'se' recorded here therefore UNDERSTATES the uncertainty: it varies walker seeds with the fit held fixed, and there is a fit-to-fit term it has no way to see. Section 8.6 quotes the reduction as a range for this reason and no test pins either end.",
+  "n_restarts_matters": "n_restarts is part of WHAT IS MEASURED, not a tuning knob. best_k_dets restarts a non-convex fit from n_restarts random points and keeps the best, so a different count lands in a different optimum and moves every k > 1 entry. Regenerated once at 2 by mistake: k = 1 reproduced to the digit and all nine k > 1 values moved, e.g. U = 12, k = 4 from 0.08356 to 0.08493. It must match expKK_multidet_bias.py, which uses 4.",
+  "exact": {
+    "4.0": -16.55529,
+    "8.0": -18.6269,
+    "12.0": -21.50934
+  },
+  "bias": {
+    "4.0": {
+      "1": [
+        0.01141,
+        0.00028
+      ],
+      "2": [
+        0.00969,
+        0.00138
+      ],
+      "4": [
+        0.003,
+        0.00061
+      ],
+      "6": [
+        0.00326,
+        0.00095
+      ]
+    },
+    "8.0": {
+      "1": [
+        0.05499,
+        0.00523
+      ],
+      "2": [
+        0.06666,
+        0.00095
+      ],
+      "4": [
+        0.03001,
+        0.00271
+      ],
+      "6": [
+        0.00611,
+        0.00068
+      ]
+    },
+    "12.0": {
+      "1": [
+        0.14563,
+        0.00914
+      ],
+      "2": [
+        0.16912,
+        0.0058
+      ],
+      "4": [
+        0.08431,
+        0.00134
+      ],
+      "6": [
+        0.0318,
+        0.00367
+      ]
+    }
+  }
+}

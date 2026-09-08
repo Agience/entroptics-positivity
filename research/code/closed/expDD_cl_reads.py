@@ -115,6 +115,9 @@ def score(rows, title):
     for name, key in READS:
         v = np.array([r[key] for r in rows], float)
         ok = np.isfinite(v)
+        # A HAND-CHOSEN MINIMUM, AND THEREFORE NOT QUOTABLE. 4 is picked, not derived, and it
+        # decides which reads get a rank correlation printed at all. Nothing in §8.5 is quoted
+        # from this table. Same marking as the cuts in expPP, expQQ and expRR.
         if ok.sum() < 4:
             continue
         rho, p = spearmanr(v[ok], z[ok])

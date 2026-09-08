@@ -4,7 +4,7 @@ Experiment CC was set up to ask whether complex Langevin converges to the WRONG 
 answered a different question instead.  Going from 128 chains to 512 -- four times the sampling --
 the quoted error on the double occupancy did not halve, it ROSE, from +-0.035 to +-0.096.  A
 well-behaved estimator cannot do that.  So the earlier "2.2 sigma discrepancy" was not a
-discrepancy, it was an under-estimated error bar, and the honest reading of the 512-chain run is
+discrepancy, it was an under-estimated error bar, and the correct reading of the 512-chain run is
 z = 0.13: consistent with exact, and consistent with almost anything.
 
 That is a worse failure than a wrong answer, and a subtler one.  A wrong answer with a valid error

@@ -89,10 +89,17 @@ if __name__ == "__main__":
     print("=" * 112)
     from scipy.stats import spearmanr
     sg = np.array([r[3] for r in rows]); st = np.array([1 + r[5] for r in rows])
-    live = np.array([r[4] for r in rows]) < 0.05          # <sgn> resolved to better than 0.05
+    # A HAND-CHOSEN CUT, AND THEREFORE NOT QUOTABLE.  0.05 is picked, not derived, and it
+    # decides which rows the rank correlation below is computed on.  The same defect made an
+    # extrapolation elsewhere in this directory unreproducible: its cut admitted three rows on
+    # one seed and two on three others, so the figure it produced existed on one draw only.
+    # Nothing in the paper leans on the correlation below, and nothing should without first
+    # showing it is stable across the cut.
+    live = np.array([r[4] for r in rows]) < 0.05
     print(f"rows where <sgn> is resolved to better than +-0.05: {int(live.sum())} of {len(rows)}")
     if live.sum() >= 4:
         rho, p = spearmanr(st[live], sg[live])
         print(f"Spearman(1 + strength, <sgn>) = {rho:+.3f}   p = {p:.4f}")
-        print("A strong NEGATIVE rank correlation is the claim: the coupling degrades exactly as")
-        print("the average sign falls, and it is measured on O(1) numbers with no dynamic range.")
+        print("A strong NEGATIVE rank correlation would say the coupling degrades as the average")
+        print("sign falls.  It is computed on rows selected by a CHOSEN cut, so it is reported")
+        print("here and is not quoted in the paper.")

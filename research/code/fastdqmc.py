@@ -86,7 +86,8 @@ class FastDQMC:
             # The refresh REPLACES G, so a spike is corrected here and its damage is confined
             # to the slice that produced it.  `max_drift` over a long run therefore always
             # catches the rare tail and says nothing about whether the physics moved; the
-            # honest statistic is the FRACTION of refreshes that exceeded tolerance.
+            # statistic that means anything is the FRACTION of refreshes that exceeded
+            # tolerance.
         self.G = newG
         self.sign = float(sgn)
 
