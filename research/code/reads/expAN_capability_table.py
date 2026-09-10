@@ -62,7 +62,7 @@ if __name__ == "__main__":
               f"{d.min():9.5f}-{d.max():<9.5f}", flush=True)
     print()
     print("The first two rows are the capability: <sgn> is identically 1 with zero variance and no")
-    print("derivative to read, while the deficit has already moved and is resolved at |z| ~ 135")
+    print("derivative to read, while the deficit has already moved and is resolved at |z| ~ 137")
     print("against the instrument's own exact re-pairing null.")
     print()
     print("Read the `rel` column before quoting any row.  Reproducibility is under 1% where the")

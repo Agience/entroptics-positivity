@@ -58,7 +58,7 @@ its own exact re-pairing null with no constant supplied, returns
 * **exactly `-1.0000`** where the lockstep is perfect — recovering the particle-hole identity
   `G_up[i,i](x) + G_dn[i,i](x) = 1`, which holds configuration by configuration to a maximum
   residual of **6.7e-15**;
-* a continuous departure from `-1` as the lockstep breaks, at **|z| = 135** against a permuted
+* a continuous departure from `-1` as the lockstep breaks, at **|z| = 137** against a permuted
   control at `|z| <= 1.7`;
 * and it does so **while the average sign is still identically 1.00000 +- 0.00000**.
 
@@ -310,3 +310,10 @@ invented it was swept:
 Security issues: email **connect@agience.ai** rather than opening a public issue.
 
 Licensed under Apache-2.0 — see [`LICENSE.md`](LICENSE.md) and [`NOTICE`](NOTICE).
+
+## Declaration of generative AI use
+
+The author used Anthropic's Claude Opus (versions 4.8 and 5) in the preparation of this work. Its
+contribution was to write code, and to generate and validate content. The ideas, the construction
+and the claims are the author's. No other generative AI tool was used. The author reviewed and
+edited all output and takes full responsibility for the content of this publication.

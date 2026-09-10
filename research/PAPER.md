@@ -18,54 +18,64 @@
 
 ## Abstract
 
-The fermion sign problem in determinantal quantum Monte Carlo is normally described as the
-appearance of negative weights and quantified by the average sign, which decays exponentially in
-`beta N`. We show it is better described as the loss of a synchrony between the two spin channels;
-that the synchrony is **decidable from the one-body matrix alone**, with no sampling; and that it
-carries a continuous, exactly calibrated order parameter which the average sign cannot supply.
+The fermion sign problem in determinantal quantum Monte Carlo is normally diagnosed from the
+average sign, a quantity that costs `O(1/<sgn>^2)` to resolve and is identically 1 until the
+problem is already large. We ask a different question, and answer it with an instrument built for
+a different subject: **given only the weights a running simulation already holds -- no Hamiltonian,
+no knowledge of the decoupling, and no constant chosen by the caller -- what can be decided about
+its positivity?**
 
-Throughout, the object read is the spin decoupling of the Hubbard interaction. That qualifier is
-load-bearing and measured, not conventional: the sign problem is a property of a Hamiltonian *and*
-a decoupling, and along a family in which the physics is pinned and no representation has a sign
-problem the read still traverses its whole range (§7).
+The instrument is *Entroptics*, which reads a 2-D ordered-by-feature field as a finite optical
+aperture. A determinantal weight cloud is such a field, and the reads transfer without
+modification: `concentration` on the cloud's `(Re, Im)` frame returns a *directional* statistic
+`resultant` and an *axial* one `focus`, and the pair classifies the run into three regimes.
+`focus = 1` with `resultant = 1` is sign-free. `focus = 1` with `resultant < 1` is a real sign
+problem: rank one in the plane means the phase takes two values `pi` apart, and a phase confined
+to `Z2` is what a sign *is*. `focus < 1` is a genuine phase problem that no rotation reaches.
+Measured, `focus` is `1.0000` on every real-weight row and `0.573` to `0.833` on every genuinely
+complex one, and where it saturates the de-rotation angle is read off the cloud's own leading
+direction -- no angle chosen -- returning a maximum imaginary part of `1e-16` and recovering
+`|<sgn>|` exactly.
 
-A configuration's weight is a product of two determinants, one per spin channel, and each changes
-sign as its spectrum crosses a boundary. On a bipartite lattice at half filling the two channels
-cross **in lockstep** -- around 12% of configurations at `beta = 12`, on exactly the same
-configurations -- so the product's sign never changes. The lockstep follows from an identity
-between the two determinants which we derive and verify to 1e-14, in two field distributions whose
-closed-form constants differ by 4% and each fail in the other by fourteen orders. The disagreement
-fraction between the channels **is** the negative-weight fraction, exactly, at every parameter
-point measured.
+**That classification is actionable, and getting it wrong is expensive.** A global phase cancels
+in `<O> = sum(O w)/sum(w)` and costs nothing, but the estimator carried over from real weights,
+`mean(Re w)/mean(|w|)`, reads `cos(theta)` too small -- falling from `0.93500` to `0.25011` across
+rotations that leave `|<w>|` unmoved -- and would overstate a cost that goes as `1/<sgn>^2` by
+fourteen times.
 
-**The condition for that identity is decidable.** It holds exactly when the one-body matrix `K`
-admits a diagonal-unitary conjugation, by either of two routes: `S K S^-1 = -K`, which asks that
-every cycle of `K`'s support graph be even, or `S K S^-1 = -conj(K)`, which admits odd cycles
-carrying half-odd-integer flux. For real `K` the two coincide and reduce to a 2-colouring of the
-graph with a zero diagonal -- `O(N^2)`, no eigenvalues, no determinants, no field. Verified on
-**40 one-body matrices**, including bond-disordered lattices, a tree, and flux-threaded rings. The
-two routes are not equivalent: route A leaves the weights REAL and delivers positivity, while route
-B restores the identity on odd cycles and leaves a phase behind, so the criterion decides the
-identity and only route A carries positivity with it. It closes doping in a line -- every diagonal conjugation leaves `diag(K)` untouched, so a chemical potential is
-accommodated by no flux, on no graph, at no size.
+**The reading is validated against an independent oracle computed from the Hamiltonian, and the
+two sides share no information.** A configuration's weight is a product of two determinants, one
+per spin channel; on a bipartite lattice at half filling they change sign **in lockstep** -- around
+12% of configurations at `beta = 12`, on exactly the same ones -- so the product's sign never
+changes. That lockstep follows from an identity between the two determinants, derived and verified
+to `1e-14` in two field distributions whose closed-form constants differ by 4% and each fail in the
+other by fourteen orders. The identity holds exactly when `K` admits a diagonal-unitary
+conjugation, by either of two routes -- `S K S^-1 = -K`, which asks every cycle of `K`'s support
+graph to be even, or `S K S^-1 = -conj(K)`, which admits odd cycles carrying half-odd-integer flux.
+For real `K` the two coincide and reduce to a 2-colouring with a zero diagonal: `O(N^2)`, no
+eigenvalues, no determinants, no field. The criterion agrees with the measured identity on
+**64 of 64 one-body matrices with no mismatch** -- chains open and periodic, odd rings, stars,
+triangular ladders, bond-disordered lattices, and flux-threaded complex cases -- with the residual
+at `1e-14` where it predicts the identity holds and `0.76` to `7.5` where it predicts failure, a
+separation of thirteen orders (§4; `reads/expBA_oracle_superset.py`).
 
-The channels' alignment is directly measurable by an Entroptics coupling read, which returns
-exactly `-1.0000` where the lockstep is perfect and departs continuously as it breaks -- **while
-the average sign is still identically 1.00000 +- 0.00000**, at 135 sigma against the instrument's
-own exact null. Every value it returns is determined by the channel relation with nothing left
-over: `-1` under the particle-hole relation, `-1 + 2r` and `+1 - 2r` under the two other positivity
-mechanisms measured, with `r` the imaginary share of the frame's variance, to `1e-16`. Its deficit
-from saturation is an **angle** between the two centred channel frames, invariant under rescaling
-either channel, and an angle is bounded where `-ln<sgn>` is not: the read detects onset, not
-severity.
+The oracle sees `K` and never a configuration; the read sees two logged columns and never `K`. They
+agree on **15 of 15 lattices**. Read as a statement about data, the identity says
+`ln|det_up| - ln|det_dn|` is an exact affine function of `sum(x)`, which a normalised alignment
+saturates at 1 and a broken identity cannot -- and because that read is invariant to both the
+offset and the scale, it needs neither `lambda` nor `tr(K)`. That is what makes it usable as a
+**build check**: on a lattice built with a periodic wrap where open was intended, the read fires at
+`beta = 1` to `3` while not one negative weight has appeared and the criterion computed on the
+*intended* lattice still reports sign-free.
 
-The scope is measured rather than assumed, and it separates a comparison from a one-sided read.
-A comparison between the two channels reaches a real determinantal weight, whose sign is a product
-of two determinant signs, and cannot reach a complex one: its phase is common to the two channels,
-so a comparison is blind to it by construction. We exhibit systems whose negative fractions differ
-by 33 percentage points and whose reads are identical. Read one-sidedly the same weight is exact,
-and a companion read separates a phase that is global -- cancelling in `<O> = sum(O w)/sum(w)`, and
-so not a sign problem at all -- from one that varies configuration to configuration and is.
+**The scope is measured, and it separates a comparison from a one-sided read.** A comparison
+between the two channels cannot reach a complex weight -- its phase is common to both, so the
+comparison is blind by construction, and we exhibit systems whose negative fractions differ by 33
+percentage points and whose reads are identical. The same weight read one-sidedly is exact. What
+neither can do is bounded from below: correct importance sampling draws at `|w|`, so Kish's
+effective sample size of those weights is exactly `n <sgn>^2`, a property of the weights and
+therefore a ceiling on every aggregation of them. The read detects onset; it cannot report
+severity, and no fixed map between the two can exist.
 
 ---
 
@@ -418,8 +428,8 @@ So the criterion decides the **identity**, and nothing further on its own: it ca
 only along route A, where the weights stay real, and it does not predict the negative *fraction* on
 either route. That is the mechanism behind the next point.
 
-**The residual is not a severity measure.** It grows monotonically with `tp` while the negative
-fraction does not (0.050, 0.185, 0.080). The identity's failure permits the signs to differ; it
+**The residual is not a severity measure** (`reads/expAB_coupling_controlled.py`). It grows
+monotonically with `tp` while the negative fraction does not (0.050, 0.185, 0.080). The identity's failure permits the signs to differ; it
 does not say by how much they will.
 
 **What this does and does not establish about positivity in general.** The rows above are an
@@ -490,6 +500,39 @@ Then one call, `coupling(A, B)`, and read whether it saturates. Three places thi
   3. **As a build check.** The read sees what the code *did*, not what the model was meant to be.
      Where an assembly routine and its documentation disagree, the read follows the code.
 
+#### The build check, measured
+
+The third use is the one the other two cannot cover, because it is the case where the criterion of
+§4 is *unavailable by construction*: if the code may not be running the model its author believes,
+then the `K` and the `lambda` one would feed to a direct test of §3's identity are the suspect
+quantities themselves. The read needs neither -- it is invariant to the offset and the scale -- so
+it is the only instrument left standing (`reads/expAZ_build_check.py`).
+
+Intended: an **open** 7-site chain, bipartite, and §4's criterion computed on it reports sign-free.
+As built: a periodic wrap, making a 7-site **ring** -- an odd cycle, outside the class. The oracle
+is silent for every row below, because it reads the model rather than the code.
+
+| `beta` | negative fraction (4 seeds) | `1 - \|strength\|` | seed spread | correct-build control |
+|---|---|---|---|---|
+| 1 | **0.00000** | `1.904e-07` | `2.1e-09` | `1.1e-16` |
+| 2 | **0.00000** | `6.319e-05` | `5.8e-06` | `-2.2e-16` |
+| 3 | **0.00000** | `3.336e-04` | `6.1e-05` | `1.1e-16` |
+| 4 | 0.00125 | `7.381e-04` | `1.0e-04` | `0.0e+00` |
+
+At `beta = 1` to `3` not one negative weight appears across four seeds, so every standard health
+check passes, while the read stands eleven orders above the correctly-built control at `beta = 2`
+and five to thirty times its own seed spread. From `beta = 4` the sign fires too and the read is no
+longer needed.
+
+**The scope is two provable limits, not two gaps.** A wrong decoupling constant -- the continuous
+Gaussian `sqrt(dtau U)` used in the discrete field -- is **not** detected: `1 - |strength|` is
+`-2.2e-16`, exactly saturated, because rescaling an affine relation leaves it affine. Scale
+invariance is why the read needs no `lambda` and why it cannot see a wrong one; the two are the same
+fact, and the direct residual catches that case at `1.61`, so the two checks are complementary and
+neither dominates. Applying the field with one sign to both channels leaves the two determinants
+identical, so the logged difference is identically zero and the read returns **unresolved** rather
+than a departure -- a degenerate input, visible before any read is taken.
+
 #### Why this is not just watching the average sign
 
 Every DQMC code already reports `<sgn>`, so the read is only worth having if it fires earlier. It
@@ -512,7 +555,30 @@ whatever `beta` is cheapest to sample. What it buys is the difference between le
 `beta`, where a pilot is minutes, and learning at production `beta` from error bars that will not
 shrink.
 
-## 5. The order parameter: exact at the symmetric point, and readable along beta
+## 5. Reading the weights: which problem is it, how far from the symmetric point, and at what cost
+
+An observer standing at the output holds a cloud of configuration weights and nothing else -- no
+`K`, no knowledge of the decoupling, and no constant to supply. This section is what can be
+decided from there, and it has three parts, in the order a practitioner meets them.
+
+**First, which problem the run has.** `concentration` on the weight cloud's `(Re, Im)` frame
+returns a *directional* statistic and an *axial* one, and only the pair classifies: `focus = 1`
+with `resultant = 1` is sign-free; `focus = 1` with `resultant < 1` is a real sign problem, because
+rank one in the plane means the phase takes two values `pi` apart and a phase confined to `Z2` is
+what a sign *is*; `focus < 1` is a phase problem no rotation reaches. That triage is §5.3, and it
+is the part that decides what the rest of the section is even measuring.
+
+**Second, how far the run sits from the protecting symmetry**, which is the coupling read below --
+exactly calibrated where the lockstep is perfect, and moving while the average sign is still
+identically 1.
+
+**Third, what any of it can cost**, which §8 bounds.
+
+The order is deliberate: the coupling read that follows is a statement about a *real* determinantal
+weight, so the classification has to come first or the reading is being taken on an object it does
+not apply to.
+
+### 5.1 The coupling read, and its exact calibration
 
 The lockstep of §2 is produced by the identity of §3, and the identity holds exactly at the
 symmetric point of §4. That suggests a continuous measure of how far a system sits from that
@@ -832,6 +898,8 @@ fully visible and exactly saturated. In the control the channels are bit-identic
 saturates on a degenerate input, and that model's sign problem lives in a **phase common to both
 channels**, which no comparison *between* the channels can reach.
 
+### 5.2 Where the comparison stops: a phase common to both channels
+
 **So the correspondence between saturation and sign-freedom is a statement about real
 determinantal weights**, whose sign is a product of two determinant signs. That is the setting
 every row of §§2-4 was measured in, and it is where that correspondence holds.
@@ -840,8 +908,9 @@ It is not where the reading stops, and the distinction matters. A complex weight
 a **comparison** between the two channels -- for a reason given below, that its phase is common to
 them -- and is read exactly by a **one-sided** read of the weight itself. What the two-mode
 diagnosis further separates is whether that phase is global, in which case it cancels in
-`<O> = sum(O w)/sum(w)` and is not a sign problem at all, or configuration-dependent, in which case
-it is the problem and no rotation reaches it.
+`<O> = sum(O w)/sum(w)` and costs nothing -- leaving a real weight whose own sign problem
+`resultant` then measures -- or configuration-dependent, in which case it is the problem itself and
+no rotation reaches it.
 
 **The Kramers reading is the same arithmetic as §4's route A, with one sign changed.** There
 `G_dn = conj(G_up)`, so the real parts are exact positives and the imaginary parts exact negatives,
@@ -886,6 +955,32 @@ perfectly aligned. The weight is `det_up * det_dn`, so its phase is twice a phas
 SHARE, and it varies configuration to configuration. Two aligned quantities moving together are
 invisible to any comparison between them, which is what every two-sided read reported.
 
+### 5.3 The triage: which problem is it?
+
+**The triage recovers §4's positivity verdict from the weights alone**
+(`reads/expAV_monomial_conjugation.py`). §4 establishes from `K` that route B buys the identity
+*without* positivity. That same verdict is readable from the output, where an observer actually
+stands -- holding a finite sample of weights and no knowledge of the mechanism. On four route-B
+lattices the identity holds to machine precision, so every comparison between the channels is
+saturated and blind:
+
+| lattice | §3 identity residual | `focus` | `\|Im\|` after de-rotation | sign deficit |
+|---|---|---|---|---|
+| ring 5, flux `pi/2` | `1.42e-14` | 0.75254 | 1.000 | 0.10998 |
+| ring 7, flux `pi/2` | `2.49e-14` | 0.83339 | 0.999 | 0.08482 |
+| tri ladder 6, flux `pi/2` | `3.77e-14` | 0.54294 | 1.000 | 0.31001 |
+| tri ladder 8, flux `pi/2` | `3.55e-14` | 0.57340 | 1.000 | 0.36442 |
+
+Every row satisfies the identity and still carries a phase. `focus` below 1 says the cloud is not
+rank one, so no global rotation makes those weights real -- which is §4's statement that route B
+carries the identity without positivity, obtained with no `K` and no mechanism. Nothing here is
+thresholded: `focus` is compared to 1, the definitional value of a rank-one cloud.
+
+This is the case that separates the two halves of §5. The channel comparison of §5.1 is exactly
+saturated on all four rows and reports nothing; the one-sided triage reads the answer off the
+cloud's own geometry. A reader who takes only §5.1 from this section would conclude these lattices
+are fine.
+
 The same quantity read one-sidedly is available. On the weight's unit-modulus frame,
 `concentration.resultant` -- the length of the mean row, the von Mises-Fisher sufficient statistic
 -- **is** `|<w/|w|>|` by construction rather than by measurement, so its agreement is arithmetic
@@ -924,11 +1019,23 @@ falling from `0.93500` to `0.25011` across the same rotations, and would oversta
 goes as `1/<sgn>^2` by fourteen times. So `focus` is worth reading not because a global phase must
 be removed but because it identifies when the real-part estimator has stopped being the right one.
 
-*What that leaves.* `focus = 1` says the phase is global, hence cancelling, hence not a sign
-problem at all -- read `|<w>|` and proceed. `focus < 1` says the phase varies configuration to
-configuration, and that phase does **not** cancel in the ratio: it is the problem itself, and no
-rotation reaches it. The read separates a representation artefact from the physics, which is a
-diagnosis and not a saving.
+*What that leaves, and it takes both numbers rather than one.* `focus` and `resultant` answer
+different questions, and only the pair classifies. `focus = 1` says the cloud is rank one in the
+`(Re, Im)` plane, so a single global rotation makes every weight real -- it does **not** say the
+run is sign-free. What survives that rotation is a real problem whose severity is `resultant`:
+`1.00000` on the clean lattice and on the inert twist, `0.93500` and `0.92500` on the staggered and
+doped rows, which are sign problems and are exactly the ones §4's criterion speaks to. `focus < 1`
+says no rotation reaches it and the phase varies configuration to configuration: it does not cancel
+in the ratio, and it is the problem itself. So the three regimes are `(focus = 1, resultant = 1)`
+sign-free, `(focus = 1, resultant < 1)` a real sign problem, and `focus < 1` a genuine phase
+problem. The read separates a representation artefact from the physics, which is a diagnosis and
+not a saving.
+
+**The sign problem is the rank-one case of a phase problem.** Rank one in the plane is the
+statement that the phase takes exactly two values `pi` apart -- a `Z2` subgroup of `U(1)` -- and a
+phase confined to `Z2` is what a sign *is*. So `focus` reads the rank, the rank decides which of
+the two a run has, and both are read from the weights alone with no constant supplied and no
+Hamiltonian consulted.
 
 So a caller with complex weights can ask which problem they have before deciding what to do about
 it: `focus = 1` says a phase that a rotation removes, leaving the sign problem §4's criterion
@@ -1399,9 +1506,29 @@ and compares no channels, so neither the ceiling nor the blindness applies to it
 statement about where to look and not as a result: what it costs to identify such an operator from
 data a sign problem actually permits is not settled here.
 
+**One attempt on that route is recorded, and it failed** (`reads/expAY_order_from_the_instrument.py`).
+The prize is concrete: a correlation sequence `C(tau) = sum_i c_i lambda_i^tau` is measured at short
+`tau`, where the sign is still mild and sampling is cheap, and the eigenvalues it identifies fix the
+operator that gives the long-time behaviour one would otherwise pay `1/<sgn>^2` to sample. The
+bottleneck is **model order** -- how many `lambda_i` to keep -- and every standard answer is a
+chosen number: an information criterion picks a penalty, a singular-value cut picks a level, a
+stability window picks a width. Under this paper's rules none is admissible.
+
+`spectral_optics` reports `resolved_modes`, a count against a floor derived from the data rather
+than supplied, which is model-order selection performed by the read. It does not work here, and the
+reason is structural rather than a floor set wrong: on the Hankel embedding of a sum of decaying
+exponentials it returns **1 for every true order above 1**, at every noise level including none,
+while the same matrix has exact numerical rank 2 and 3 with singular values an order of magnitude
+apart (5.42 and 0.46 at order 2). The leading mode carries a `top_share` of 0.994 to 0.996 there:
+the modes are real and wildly unequal, and a floor that separates signal from a noise sea is asking
+a different question from "how many modes are there".
+
+So the row stays open, and one route into it is now closed by measurement rather than left for a
+reader to re-attempt.
+
 **What the measurement can and cannot supply.** The order parameter of §5 gives an exactly
 calibrated, continuously varying measure of distance from the protecting symmetry, readable at
-135 sigma in a regime where the average sign is identically 1 and has no derivative. It does not
+137 sigma in a regime where the average sign is identically 1 and has no derivative. It does not
 forecast severity: it is bounded in `[0, 2]` while `-ln<sgn>` is unbounded, and §7 gives the
 reason no continuous summary reaches the severity -- the severity is a count of parity
 disagreements, and a parity is a global property of a spectrum that no scalar determines.
