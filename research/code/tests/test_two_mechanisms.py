@@ -28,7 +28,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
@@ -61,7 +61,7 @@ def run(mu, channel, beta, U=4.0, Lx=2, Ly=4, dtau=0.125, n_draw=300, seed=0):
         A.append(row[+1]); B.append(row[-1]); S.append(s)
         sep.append(float(np.abs(row[+1] - row[-1]).max()))
     A, B = np.array(A), np.array(B)
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     return dict(neg=float(np.mean(np.array(S) < 0)), strength=float(c.strength),
                 z=float(c.z), resolved=bool(c.resolved), sep=float(np.max(sep)))
 
@@ -126,7 +126,7 @@ def test_doping_separates_the_two_mechanisms():
 def test_saturation_and_a_zero_negative_fraction_are_not_equivalent():
     """A row with no negative weight in 300 draws that is nonetheless not saturated.
 
-    This is section 5's result -- the read departs before the average sign does -- and it is
+    This is section 7's result -- the read departs before the average sign does -- and it is
     asserted here so a later draft cannot quietly upgrade saturation into an iff with sign-freedom.
     """
     rs = [run(0.8, "spin", beta=6.0, seed=s) for s in SEEDS]

@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 from dqmc import Model
 from sampler_stable import StableChains
 from stable import udt_product, inv_one_plus
@@ -79,7 +79,7 @@ if __name__ == "__main__":
             m = Model(N=N, t=1.0, t2=t2, mu=mu, U=U, dtau=dtau, L=L)
             A, B, S, acc = run(m, seed=int(beta * 10 + t2 * 10 + mu * 10))
             s, se = float(S.mean()), float(S.std(ddof=1) / np.sqrt(len(S)))
-            c = E.reads.coupling(A, B)
+            c = EA.channel_alignment(A, B)
             rows.append((beta, t2, mu, s, se, float(c.strength), float(c.z), int(c.resolved)))
             print(f"{beta:5.1f} {t2:5.2f} {mu:5.2f} | {s:9.5f} {se:8.5f} {len(S):6d} "
                   f"{acc:6.3f} | {c.strength:9.4f} {1+c.strength:11.4f} {c.z:8.2f} "

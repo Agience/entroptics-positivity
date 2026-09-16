@@ -2,7 +2,7 @@
 
 WHAT IS BEING HELD.  A lattice built with a periodic wrap where open was intended, on an ODD
 chain, is a non-bipartite model.  At `beta = 2` it produces no negative weight at all, so every
-standard health check passes, and the section 4 criterion computed on the INTENDED lattice says
+standard health check passes, and the section 5 criterion computed on the INTENDED lattice says
 `sign-free` because it reads the model rather than the code.  `coupling` on two logged columns
 fires anyway, and needs neither `lambda` nor `tr(K)` to do it.
 

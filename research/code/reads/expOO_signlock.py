@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
@@ -64,9 +64,9 @@ def sample(m, n_draw, seed=0):
 
 
 def report(tag, a, b, rng):
-    c = E.reads.coupling(a, b)
+    c = EA.channel_alignment(a, b)
     perm = rng.permutation(len(b))
-    cn = E.reads.coupling(a, b[perm])
+    cn = EA.channel_alignment(a, b[perm])
     return c, cn
 
 

@@ -1,6 +1,6 @@
 """The order parameter's surviving claims, as gates.
 
-Two claims survived the narrowing in §5 and both are pinned here. Claims that did NOT survive are
+Two claims survived the narrowing in §7 and both are pinned here. Claims that did NOT survive are
 also pinned -- as tests that they do not hold -- because an earlier draft asserted them and only a
 test stops a later draft asserting them again.
 
@@ -19,7 +19,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
@@ -64,7 +64,7 @@ def test_the_coupling_is_exactly_minus_one_at_the_symmetric_point(beta):
                 L=int(round(beta / 0.125)), theta=0.0)
     A, B, S = channels(m, 300, seed=int(beta))
     assert float(np.mean(S < 0)) == 0.0, "a sign problem here would void the calibration"
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     assert c.resolved
     assert c.strength == pytest.approx(-1.0, abs=1e-4)
 
@@ -80,7 +80,7 @@ def test_the_permuted_control_is_not_resolved(beta):
                 L=int(round(beta / 0.125)), theta=0.0)
     A, B, _ = channels(m, 300, seed=int(beta) + 5)
     rng = np.random.default_rng(1)
-    cn = E.reads.coupling(A, B[rng.permutation(len(B))])
+    cn = EA.channel_alignment(A, B[rng.permutation(len(B))])
     # The read's own verdict, which is what this test is named after. `|z| < 4` was a level
     # chosen for an instrument that already decides this itself.
     assert not cn.resolved, f"the permuted control resolved: |z| = {abs(cn.z):.2f}"
@@ -98,9 +98,9 @@ def test_the_deficit_moves_where_the_average_sign_cannot():
         m = Model2D(Lx=2, Ly=4, t=1.0, mu=0.4, U=4.0, dtau=0.125,
                     L=int(round(beta / 0.125)), theta=0.0)
         A, B, S = channels(m, 400, seed=int(beta) + 21)
-        c = E.reads.coupling(A, B)
+        c = EA.channel_alignment(A, B)
         rng = np.random.default_rng(int(beta) + 909)
-        null = E.reads.coupling(A, B[rng.permutation(len(B))])
+        null = EA.channel_alignment(A, B[rng.permutation(len(B))])
         out.append((float(np.mean(S < 0)), 1.0 + float(c.strength),
                     abs(float(c.z)), bool(c.resolved), 1.0 + float(null.strength)))
     # the average sign carries no information on these rows
@@ -125,7 +125,7 @@ def test_tightness_is_not_a_coupling_property():
     """
     m = Model2D(Lx=2, Ly=4, t=1.0, mu=0.0, U=4.0, dtau=0.125, L=64, theta=0.0)
     A, B, _ = channels(m, 400, seed=31)
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     assert c.tightness == pytest.approx(fourth_power_share(A), abs=1e-6)
     assert c.tightness == pytest.approx(fourth_power_share(B), abs=1e-6)
     # and it is NOT the sigma^2 share -- so the test cannot pass by both being near 1
@@ -159,7 +159,7 @@ def test_the_deficit_is_blind_to_a_rescaling_of_one_channel():
     for scale in (1.0, 2.0, 0.3):
         B = 1.0 - scale * A
         violation = violation_at(scale)
-        deficit = 1.0 + float(E.reads.coupling(A, B).strength)
+        deficit = 1.0 + float(EA.channel_alignment(A, B).strength)
         assert deficit == pytest.approx(0.0, abs=1e-9), \
             f"a pure rescaling moved the deficit to {deficit:.2e}"
         if scale != 1.0:
@@ -171,11 +171,15 @@ def test_the_deficit_is_blind_to_a_rescaling_of_one_channel():
 
 
 def test_the_perpendicular_violation_predicts_the_deficit_at_small_angle():
-    """deficit = |E_perp|^2 / (2 |A| |B|) to leading order, on the capability rows.
+    """deficit = |E_perp|^2 / (2 |A| |B|) to leading order, on synthetic frames.
 
-    Checked where the small-angle form is valid and NOT beyond it: by beta = 4 the deficit reaches
-    0.09 and the quadratic form is 4% low, which is the approximation failing rather than the
-    relation.
+    This pins the ALGEBRA of the decomposition, on frames built to a known violation `eps`, where
+    the relation must hold to the tolerance below. It says nothing about any beta.
+
+    Where the small-angle form stops describing the DQMC deficit is a separate question and is
+    measured on section 7's own chains by `reads/expBH_perpendicular_violation.py`: the miss runs
+    from 1.68% at beta = 1 to 13.92% at beta = 6. Quoting that boundary from this test would be
+    quoting a synthetic frame as if it were the capability axis.
     """
     rng = np.random.default_rng(3)
     A = rng.standard_normal((400, 8))
@@ -187,6 +191,6 @@ def test_the_perpendicular_violation_predicts_the_deficit_at_small_angle():
         Ep = Ev - ((Ev * Ac).sum() / (Ac ** 2).sum()) * Ac
         pred = float(np.linalg.norm(Ep) ** 2
                      / (2 * np.linalg.norm(Ac) * np.linalg.norm(Bc)))
-        deficit = 1.0 + float(E.reads.coupling(A, B).strength)
+        deficit = 1.0 + float(EA.channel_alignment(A, B).strength)
         assert deficit == pytest.approx(pred, rel=0.05), \
             f"eps = {eps}: predicted {pred:.6f}, measured {deficit:.6f}"

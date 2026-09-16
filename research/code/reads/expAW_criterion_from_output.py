@@ -1,11 +1,11 @@
-"""§4's criterion, performed by a READ on the simulation's output instead of on the Hamiltonian.
+"""§5's criterion, performed by a READ on the simulation's output instead of on the Hamiltonian.
 
-WHAT THIS REPLACES.  §4 decides the identity from `K`: build the support graph, look for a diagonal
+WHAT THIS REPLACES.  §5 decides the identity from `K`: build the support graph, look for a diagonal
 unitary with `S K S^-1 = -K`, two-colour, check the flux on every odd cycle.  That is a decision
 about a matrix, and a running simulation does not hand you a clean matrix -- it hands you
 configurations and determinants.
 
-WHAT THE READ USES INSTEAD.  §3's identity is
+WHAT THE READ USES INSTEAD.  §4's identity is
 
     ln|det_up|(x) - ln|det_dn|(x)  =  -dtau L tr(K)  +  lambda * sum(x)
 
@@ -27,7 +27,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import expm
 
-import entroptics as E
+import entroptics_adapter as EA
 from stable import slogdet_one_plus_block, udt_product
 
 
@@ -67,9 +67,9 @@ def read_the_identity(K, **kw):
     re-pairing -- destroy the correspondence between the two columns and the reading must go.
     """
     A, B = channels(K, **kw)
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     rng = np.random.default_rng(99)
-    null = E.reads.coupling(A, B[rng.permutation(len(B))])
+    null = EA.channel_alignment(A, B[rng.permutation(len(B))])
     return c, null
 
 
@@ -126,3 +126,40 @@ if __name__ == "__main__":
     for name, s, h, strength, resid in rows:
         if s != h:
             print(f"  disagrees: {name:>24}  strength {strength:+.9f}  residual {resid:.3e}")
+
+    # ------------------------------------------------------------------------------------------
+    # IS THE DEPARTURE THE READ'S OWN NOISE?  A read that saturates on the sign-free rows and
+    # departs on the broken ones proves nothing if the departure shrinks as the sample grows --
+    # that would be the read reporting its own finite-sample scatter and calling it a signal.
+    #
+    # The test is a DIRECTION, not a value: across a factor of four in sample size and three seeds,
+    # the saturated rows must stay at machine zero and the broken ones must stay put. A departure
+    # that fell like 1/sqrt(n) would be noise; one that does not move is the identity's.
+    # ------------------------------------------------------------------------------------------
+    print()
+    print("=" * 116)
+    print("DOES THE DEPARTURE SHRINK WITH SAMPLING?  If it does, it is the read's own noise.")
+    print()
+    # The identity's verdict is a property of K, so it is taken from the table above rather than
+    # recomputed per cell: `measure` samples as heavily as the read does, and recomputing it nine
+    # times over fifteen lattices is what made an earlier version of this sweep run past an hour.
+    # Six representative lattices, three sample sizes spanning a factor of four, three seeds.
+    verdict = {name: holds for name, _sat, holds, _s, _r in rows}
+    picks = [(name, K) for name, K in CASES
+             if name in ("2x4 clean", "ring 6", "ring 5 flux pi/2",
+                         "2x4 staggered h=0.2", "ring 5", "tri ladder 6")]
+    print(f"{'n_draw':>8} {'seed':>6} | {'saturated: max 1-|strength|':>29} | "
+          f"{'broken: min':>13} {'max':>11}")
+    print("-" * 116)
+    for n_draw in (60, 120, 240):
+        for seed in (5, 6, 7):
+            sat, brk = [], []
+            for name, K in picks:
+                c, _null = read_the_identity(np.asarray(K, dtype=complex),
+                                             n=n_draw, seed=seed)
+                (sat if verdict[name] else brk).append(1 - abs(float(c.strength)))
+            print(f"{n_draw:>8} {seed:>6} | {max(sat):>29.3e} | {min(brk):>13.3e} "
+                  f"{max(brk):>11.3e}", flush=True)
+    print("-" * 116)
+    print("  The saturated column stays at machine zero and the broken range does not close as")
+    print("  n_draw quadruples.  A read reporting its own scatter would show both shrinking.")

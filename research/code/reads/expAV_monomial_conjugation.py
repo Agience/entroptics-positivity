@@ -1,6 +1,6 @@
-"""§4's diagonal restriction is NECESSARY, and a monomial conjugation is the counterexample.
+"""§5's diagonal restriction is NECESSARY, and a monomial conjugation is the counterexample.
 
-THE RESULT.  §4 decides the identity by asking for a DIAGONAL unitary `S` with `S K S^-1 = -K`.
+THE RESULT.  §5 decides the identity by asking for a DIAGONAL unitary `S` with `S K S^-1 = -K`.
 The natural objection is that diagonal is arbitrary -- what the derivation needs is that conjugation
 leave the interaction's coupling DIAGONAL, and a monomial `S = P_pi D` does that too, carrying
 `diag(v)` to `diag(pi v)`.  Widening the class that way is tested here and it BREAKS the criterion:
@@ -17,17 +17,17 @@ by 5.28 and 9.89.
 
 WHY, AND IT IS NOT AN ACCIDENT OF THIS LATTICE.  `S B_up(x) S^dag` carries `diag(exp(lam pi x))` --
 the RELABELLED field.  Summing over every field configuration is invariant under relabelling
-sites, so the partition function survives a permutation.  The §3 identity is a PER-CONFIGURATION
+sites, so the partition function survives a permutation.  The §4 identity is a PER-CONFIGURATION
 statement, and at fixed `x` the permuted configuration is a different one.  The permutation costs
 exactly the per-configuration relation and nothing less.  A diagonal `S` is the identity
 permutation, which is why it is the class the derivation admits.
 
-This is a strengthening of §4: the restriction to diagonal `S` is not a conservative convenience
+This is a strengthening of §5: the restriction to diagonal `S` is not a conservative convenience
 chosen for tractability, and there is now a constructed lattice proving it cannot be relaxed.
 
 WHAT ENTROPTICS SUPPLIES, AND IT IS THE POSITIVITY HALF.
 
-§4 says route B buys the identity WITHOUT positivity.  That statement is made from `K`.  It is also
+§5 says route B buys the identity WITHOUT positivity.  That statement is made from `K`.  It is also
 readable from the OUTPUT, which is where an observer actually stands -- holding a finite sample of
 configuration weights and no knowledge of the mechanism:
 
@@ -39,7 +39,7 @@ configuration weights and no knowledge of the mechanism:
 
 On all four route-B lattices here the read returns `focus` of 0.54 to 0.83 and an imaginary part of
 order 1 surviving de-rotation on the cloud's own axis.  It says, from the weights alone, that the
-residual phase is not removable -- which is §4's positivity claim, obtained without `K`.
+residual phase is not removable -- which is §5's positivity claim, obtained without `K`.
 
 The instrument's mode count is part of that answer.  On a sign-free lattice the cloud is a POINT on
 the real axis and `principal_directions` resolves NOTHING above its floor, returning zero columns.
@@ -55,7 +55,7 @@ from itertools import permutations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 from reads.expAO_spectral_criterion import (
     _phase_bfs, build, chain, criterion, measure, ring, route_A, route_B, tri_ladder,
 )
@@ -80,8 +80,8 @@ def read_the_cloud(u):
     single global rotation carries onto one axis; two is a genuine spread no rotation removes.
     """
     X = np.stack([u.real, u.imag], axis=1)
-    c = E.reads.concentration(X)
-    V = E.reads.principal_directions(X)
+    c = EA.weight_cloud(X)
+    V = EA.cloud_axes(X)
     modes = int(V.shape[1])
     axis = 0.0 if modes == 0 else float(np.arctan2(np.real(V[1, 0]), np.real(V[0, 0])))
     v = u * np.exp(-1j * axis)
@@ -231,7 +231,7 @@ if __name__ == "__main__":
             print(f"  monomial FALSE POSITIVE: {r['name']:>24}  S K S^dag = -K exact, "
                   f"permutation {r['pi']}, identity residual {r['resid']:.3e}")
     print()
-    print("The diagonal restriction in section 4 is NECESSARY.  A monomial S admits a potential")
+    print("The diagonal restriction in section 5 is NECESSARY.  A monomial S admits a potential")
     print("its permutation maps to its own negative -- which a diagonal S can never do -- and on")
     print("those lattices the conjugation is exact while the identity fails.  The permutation")
     print("relabels the auxiliary field: the partition function is invariant under that, and the")
@@ -246,5 +246,5 @@ if __name__ == "__main__":
                   f"|Im| after de-rotation {r['after']:.2e}  deficit {r['deficit']:.5f}")
     print()
     print("Every row above satisfies the identity and still carries a phase.  `focus` below 1 says")
-    print("the cloud is not rank one, so no global rotation makes those weights real -- section 4's")
+    print("the cloud is not rank one, so no global rotation makes those weights real -- section 5's")
     print("statement that route B carries the identity without positivity, obtained from output.")

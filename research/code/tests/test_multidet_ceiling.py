@@ -1,13 +1,13 @@
-"""§8.6's fitted ceiling, gated against a RECORDED reference rather than a live sweep.
+"""§9.6's fitted ceiling, gated against a RECORDED reference rather than a live sweep.
 
 WHY A REFERENCE AND NOT A MEASUREMENT.  The sweep costs 73 minutes and there is no cheap version
 of it: measured 2026-09-07, dropping to `n_walkers = 120` grows the error bar at `U = 4, k = 1`
 from `0.00028` to `0.00877` -- a factor of 31 for a 3.3x reduction in walkers, where square-root
 scaling predicts 1.8 -- and pushes the `U = 4, k = 4` bias across zero, which makes every ratio
 built on it meaningless.  The estimate of the error is heavy-tailed at low statistics, which is the
-same behaviour §8.5 measures in complex Langevin.  A gate that takes 73 minutes is a gate that
+same behaviour §9.5 measures in complex Langevin.  A gate that takes 73 minutes is a gate that
 stops being run, and "quoted from an experiment nobody runs" is the defect that put wrong figures
-in §§8.6 and 8.7 in the first place.
+in §§9.6 and 8.7 in the first place.
 
 So the expensive measurement is recorded in `reference/multidet_ceiling.json` with its parameters
 and its date, and these tests are fast checks against it.  Regenerating the reference is a
@@ -17,7 +17,7 @@ WHAT THESE TESTS PROTECT.
 
   * `expLL_unfitted_trial.CEILING`, a hardcoded copy of these numbers used as a baseline, must
     still agree with the reference -- it drifted once and nothing noticed;
-  * §8.6's quoted range `1.7x` to `10.4x` must be what the reference says;
+  * §9.6's quoted range `1.7x` to `10.4x` must be what the reference says;
   * the direction of the `k = 2` move must be what the reference resolves, and ONLY where the
     seed spread resolves it. An earlier draft read three reversals off point estimates and stated
     all three; one is 0.68 errors from nothing and another is 0.64.
@@ -110,7 +110,7 @@ def test_expll_reads_the_ceiling_from_the_reference_and_does_not_copy_it(U):
 
 @pytest.mark.parametrize("U", COUPLINGS)
 def test_four_to_six_determinants_beat_one(U):
-    """§8.6's claim, at the k values it names, resolved by disjoint error bars."""
+    """§9.6's claim, at the k values it names, resolved by disjoint error bars."""
     for k in (4, 6):
         assert resolved_below(U, k, 1), \
             f"U={U}: k={k} does not beat the single determinant with disjoint error bars " \
@@ -119,7 +119,7 @@ def test_four_to_six_determinants_beat_one(U):
 
 
 def test_the_second_determinant_moves_both_ways_across_couplings():
-    """The structure §8.6 reports, and only where the seed spread resolves it.
+    """The structure §9.6 reports, and only where the seed spread resolves it.
 
     On point estimates this table shows three reversals. Two of them -- `U = 8` at 0.68 errors and
     `U = 4`'s k=6 against k=4 at 0.64 -- are consistent with nothing, and an earlier draft stated
@@ -144,11 +144,11 @@ def test_adding_a_sixth_determinant_to_four_settles_nothing():
     """
     assert not resolved_below(4.0, 6, 4) and not resolved_below(4.0, 4, 6), \
         "U=4's k=6 against k=4 is now resolved on this fit; check a second fit before restating " \
-        "§8.6, because the fit-to-fit scatter exceeds the seed spread these intervals use"
+        "§9.6, because the fit-to-fit scatter exceeds the seed spread these intervals use"
 
 
 def test_the_quoted_range_is_the_reference_range():
-    """§8.6 quotes `1.7x` to `10.4x`. Both ends come from here, and the spread is real."""
+    """§9.6 quotes `1.7x` to `10.4x`. Both ends come from here, and the spread is real."""
     def band(U, k):
         r = abs(bias(U, 1)) / abs(bias(U, k))
         rel = float(np.hypot(sigma(U, 1) / abs(bias(U, 1)), sigma(U, k) / abs(bias(U, k))))

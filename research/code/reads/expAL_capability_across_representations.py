@@ -1,11 +1,11 @@
 """Experiment AL -- does the CAPABILITY claim survive a change of representation?
 
-Section 5's useful claim is not that the coupling reads -1 at the symmetric point.  It is that
+Section 7's useful claim is not that the coupling reads -1 at the symmetric point.  It is that
 along beta at fixed filling the coupling's DEFICIT from saturation moves, monotonically and
 resolved, in a regime where the average sign is identically 1 and therefore has no derivative to
 read.  Everything else in the paper is structure; that is the part that would be used.
 
-It has only ever been measured with the discrete Ising field.  AK showed the section 3 identity and
+It has only ever been measured with the discrete Ising field.  AK showed the section 4 identity and
 the lockstep are properties of the decoupling's structure rather than of the field distribution, so
 the capability ought to be too -- but "ought to" is not a measurement, and this is the claim least
 able to afford being representation-specific.
@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
@@ -52,8 +52,8 @@ def read_axis(field, beta, mu, U=4.0, dtau=0.125, Lx=2, Ly=4, n=400, seed=0):
             s *= float(np.real(sg[0]))
         A.append(g[+1]); B.append(g[-1]); S.append(s)
     A, B, S = np.array(A), np.array(B), np.array(S)
-    c = E.reads.coupling(A, B)
-    nullc = E.reads.coupling(A, B[np.random.default_rng(seed + 1).permutation(len(B))])
+    c = EA.channel_alignment(A, B)
+    nullc = EA.channel_alignment(A, B[np.random.default_rng(seed + 1).permutation(len(B))])
     return dict(neg=float(np.mean(S < 0)), deficit=1.0 + float(c.strength),
                 z=abs(float(c.z)), res=bool(c.resolved), nullz=abs(float(nullc.z)),
                 nullres=bool(nullc.resolved))

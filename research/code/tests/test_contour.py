@@ -1,11 +1,11 @@
-"""§8.4, gated: a contour shift does not mitigate the two-dimensional phase problem.
+"""§9.4, gated: a contour shift does not mitigate the two-dimensional phase problem.
 
 Run at a cheaper point than the paper's table -- `beta = 3` rather than `6` -- because the scan is
 the most expensive thing in this repo. What is preserved is the structure that makes the claim mean
 anything:
 
   * the undeformed point must HAVE a phase problem. At `mu = 0` this lattice is half filled on a
-    bipartite graph, the sign-free point of §4, where the undeformed phase is 1.0000 and every
+    bipartite graph, the sign-free point of §5, where the undeformed phase is 1.0000 and every
     shift can only spoil it -- a scan there returns a null result for a reason that has nothing to
     do with contour deformation. That trap is asserted against directly.
   * the large-amplitude point is the one that matters. A thimble need not lie near the real axis,
@@ -64,7 +64,7 @@ def test_a_large_shift_does_not_help():
 def test_the_sign_free_point_is_useless_for_this_test_and_is_known_to_be():
     """The trap this experiment was written to avoid, pinned so it cannot be walked into again.
 
-    At mu = 0 the lattice is at §4's sign-free point: the undeformed phase is 1 and any scan there
+    At mu = 0 the lattice is at §5's sign-free point: the undeformed phase is 1 and any scan there
     shows every shift 'doing nothing' for a trivial reason.
     """
     base, _, _ = phase_at(_model(0.0), 0.0, "uniform", n_meas=100, warm=50)

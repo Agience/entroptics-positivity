@@ -1,4 +1,4 @@
-"""The §3 identity is a property of the decoupling's STRUCTURE, not of the Ising field.
+"""The §4 identity is a property of the decoupling's STRUCTURE, not of the Ising field.
 
 The derivation uses one property: the two spins' diagonal factors are inverses.  The continuous
 Gaussian spin decoupling has it too, with its own closed-form constant, so the same derivation

@@ -24,14 +24,20 @@ Measured here, on the same configurations that produce the negative fraction:
 
 The prediction the read has to survive is specific: `strength` should be exactly -1 at tp = 0,
 where the identity is exact and the negative fraction is zero, and should depart NON-MONOTONICALLY
-with tp, following 0.0500, 0.1850, 0.0800 rather than tp itself.
+with tp rather than following tp itself.
+
+THE FIGURES QUOTED ABOVE ARE expZZ's, ON expZZ's DRAWS. This experiment re-measures the negative
+fraction on its own configurations and gets 0.0375, 0.1825, 0.0600 -- the same shape from a second
+sample of one quantity. What is asserted is the ordering, which both reproduce. Quoting one
+experiment's figures under the other's name would attribute a number to a file that does not print
+it.
 """
 from __future__ import annotations
 
 import numpy as np
 from scipy.stats import spearmanr
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 from expZZ_matched_filling import tune_mu, free_density
@@ -74,8 +80,8 @@ if __name__ == "__main__":
         mu = tune_mu(Lx, Ly, tp, beta, target=1.0)
         m = Model2D(Lx=Lx, Ly=Ly, t=1.0, tp=tp, mu=mu, U=U, dtau=dtau, L=L, theta=0.0)
         A, B, S = channels_and_sign(m, n_draw, seed=int(tp * 100) + 3)
-        c = E.reads.coupling(A, B)
-        cn = E.reads.coupling(A, B[rng.permutation(len(B))])
+        c = EA.channel_alignment(A, B)
+        cn = EA.channel_alignment(A, B[rng.permutation(len(B))])
         neg = float(np.mean(S < 0))
         rows.append((tp, neg, 1.0 + float(c.strength)))
         print(f"{tp:5.2f} {mu:8.4f} {free_density(Lx,Ly,tp,beta,mu):8.5f} | {neg:9.4f} | "

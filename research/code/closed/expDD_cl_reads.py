@@ -33,8 +33,11 @@ Reads compared:
                    what Part 6 measured as nearly blind (3.8 -> 4.1 across the two classes).
   tail slope       the tail as a power-law exponent.
   |Im| of field    how far the trajectory left the real axis at all.
-  DecayRates       `entroptics.dynamics(W).rates()` -- the relaxation spectrum of the trajectory,
-                   on TWO feature sets, because the choice of features is part of the claim:
+  DecayRates       `EA.dynamics(W).rates()` on a CENTRED frame -- the relaxation spectrum of the
+                   trajectory, on TWO feature sets, because the choice of features is part
+                   of the claim.  Centring is load-bearing: `rates()` reads the raw propagator,
+                   where a non-zero mean appears as a mode with |mu| = 1 and captures
+                   `long_range`; see the note at the call site.  The two feature sets are:
                      field  one chain's own field components (2 L N of them), the literal
                             trajectory of the dynamical system;
                      ens    per-step ensemble summaries (mean and max of |X|, |Im X|, |K|), which
@@ -42,13 +45,22 @@ Reads compared:
 """
 from __future__ import annotations
 
+import pathlib as _pathlib
+import sys as _sys
+
+# `gate_clangevin` is a sibling of this file's parent, under `tests/`.  A bare import finds it only
+# when that directory is already on the path, so a plain `python closed/<this file>` fails.  The
+# package-style form is not available either: an unrelated installed package is also named `tests`.
+_sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parent.parent / "tests"))
+
+
 import numpy as np
 from scipy.stats import spearmanr
 
 from dqmc import Model
 from clangevin import CLangevin
 from gate_clangevin import exact_observables
-from entroptics.dynamics import dynamics
+import entroptics_adapter as EA
 
 
 def run_and_read(m, channel, eps=1e-3, chains=96, t_therm=8.0, t_meas=40.0,
@@ -89,7 +101,27 @@ def run_and_read(m, channel, eps=1e-3, chains=96, t_therm=8.0, t_meas=40.0,
                q999=float(np.quantile(dr, 0.999)) / med, slope=slope,
                im=float(np.abs(ch.X.imag).mean()))
     for tag, W in (("f", np.array(Wf)), ("e", np.array(We))):
-        r = dynamics(W).rates()
+        # CENTRED before the operator is fitted, and this is not cosmetic.  `rates()` reads the
+        # RAW propagator, on which the constant function is an eigenmode with |mu| = 1; so
+        # `long_range` = min(alpha) returns that mode at alpha ~ 0 -- the one that does NOT decay
+        # -- rather than the slowest one that does, and `spread` then divides by it.  The `e`
+        # frame is built entirely from means and maxima of absolute values, so its offset is not
+        # a detail, it is the whole scale of every column.  Measured on a frame of this shape
+        # with a true rate of 0.25, the raw read gave 0.289 at zero offset and 0.00001 at offset
+        # 100, with `spread` inflating from 11 to 5.1e+06.  Centring makes the raw operator the
+        # fluctuation operator, so both rates come off one consistent fit (the library's
+        # `connected_decay_rate()` is the same correction for the slow rate alone).
+        W = np.asarray(W, float)
+        W = W - W.mean(axis=0, keepdims=True)
+        r = EA.dynamics(W).rates()
+        # A caveat on the `f` columns specifically, measured after the centring above was in
+        # place: the field frame's slowest mode comes out at alpha ~ 4.5e-4 (spin) and 1.1e-3
+        # (charge), with `forgetting().margin` at 0.9995 and 0.9989 -- below one, so the
+        # trajectory does relax and this is NOT the constant mode returning.  But a rate of
+        # 4.5e-4 is a relaxation time of ~2200 records against a record 1200 long, so `slow_f`
+        # and `spread_f` are EXTRAPOLATIONS past the observation window rather than measurements
+        # of it.  The `e` frame does not have this problem (alpha ~ 1e-2, margin ~ 0.98).  Read
+        # the field columns accordingly; §9.5 quotes neither.
         out[f"slow_{tag}"] = float(r.long_range)
         out[f"fast_{tag}"] = float(r.short_range)
         out[f"spread_{tag}"] = float(r.short_range) / max(float(r.long_range), 1e-30)
@@ -116,7 +148,7 @@ def score(rows, title):
         v = np.array([r[key] for r in rows], float)
         ok = np.isfinite(v)
         # A HAND-CHOSEN MINIMUM, AND THEREFORE NOT QUOTABLE. 4 is picked, not derived, and it
-        # decides which reads get a rank correlation printed at all. Nothing in §8.5 is quoted
+        # decides which reads get a rank correlation printed at all. Nothing in §9.5 is quoted
         # from this table. Same marking as the cuts in expPP, expQQ and expRR.
         if ok.sum() < 4:
             continue

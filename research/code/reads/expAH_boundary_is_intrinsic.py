@@ -1,4 +1,4 @@
-"""Experiment AH -- is the boundary of section 5 intrinsic, or an artifact of reading one scalar?
+"""Experiment AH -- is the boundary of section 7 intrinsic, or an artifact of reading one scalar?
 
 Experiment AF found that on the Kramers mechanism the coupling read does not saturate as a single
 number while the real and imaginary parts saturate separately at +1 and -1.  That leaves two
@@ -31,7 +31,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import expm
 
-import entroptics as E
+import entroptics_adapter as EA
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 from reads.expAF_third_mechanism import hop_flux
 
@@ -68,11 +68,11 @@ def embed(M):
 
 def per_direction(Ae, Be):
     """Signed coupling along each direction the instrument resolves, from channel A alone."""
-    V = E.reads.principal_directions(Ae)
+    V = EA.cloud_axes(Ae)
     out = []
     for j in range(V.shape[1]):
         v = np.real(V[:, j])
-        c = E.reads.coupling((Ae @ v)[:, None], (Be @ v)[:, None])
+        c = EA.channel_alignment((Ae @ v)[:, None], (Be @ v)[:, None])
         out.append(float(c.strength) if c.resolved else None)
     return out
 
@@ -88,8 +88,8 @@ if __name__ == "__main__":
                             ("control 3pi/16", (3 * np.pi / 16, False))):
         A, B, W = channels(4, 3, 8.0, -4.0, phi, tr, seed=7)
         Ae, Be = embed(A), embed(B)
-        direct = E.reads.coupling(A, B)          # complex frame, handed in as-is
-        whole = E.reads.coupling(Ae, Be)         # the same thing, embedded by hand
+        direct = EA.channel_alignment(A, B)          # complex frame, handed in as-is
+        whole = EA.channel_alignment(Ae, Be)         # the same thing, embedded by hand
         assert abs(direct.strength - whole.strength) < 1e-9, \
             "the complex frame and its real embedding disagreed"
         per = " ".join("  --  " if v is None else f"{v:+.3f}" for v in per_direction(Ae, Be))
@@ -110,7 +110,7 @@ if __name__ == "__main__":
                             ("control 3pi/16", (3 * np.pi / 16, False))):
         A, B, W = channels(4, 3, 8.0, -4.0, phi, tr, seed=7)
         Ae, Be = embed(A), embed(B)
-        c = E.reads.coupling(Ae, Be)
+        c = EA.channel_alignment(Ae, Be)
         print(f"{name:>26} {str(np.array_equal(Ae, Be)):>7} "
               f"{float(np.mean(np.real(W) < 0)):7.4f} | {c.strength:9.4f} {c.z:8.1f} "
               f"{str(bool(c.resolved)):>5}")

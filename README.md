@@ -1,45 +1,60 @@
-# The Fermion Sign Problem is a Desynchronisation
+# Reading Positivity from the Weights Alone
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE.md)
 [![PyPI](https://img.shields.io/pypi/v/entroptics?logo=pypi&logoColor=white&label=entroptics)](https://pypi.org/project/entroptics/)
-[![Gates](https://img.shields.io/badge/gates-11%20with%20negative%20controls-0F9D58)](#the-gates)
+[![Gates](https://img.shields.io/badge/gates-16%20with%20negative%20controls-0F9D58)](#the-gates)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Agience-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Agience)
 
-**A configuration's weight is a product of two determinants, one per spin channel. Each changes
-sign as its spectrum crosses a boundary. At half filling the two channels cross that boundary
-in lockstep — on around 12% of configurations at `beta = 12`, on exactly the same
-configurations — so the product's sign never changes. Doping desynchronises
-them, and the fraction on which they disagree IS the sign problem, exactly.**
+**Given only the weights a running simulation already holds — no Hamiltonian, no knowledge of the
+decoupling, and no constant chosen by the caller — what can be decided about its positivity?**
+
+That question is answered here with an instrument built for a different subject.
+[Entroptics](https://github.com/Agience/entroptics) reads a 2-D ordered-by-feature field as a
+finite optical aperture; a determinantal weight cloud is such a field, and the reads transfer to it
+without modification. `concentration` on the cloud's `(Re, Im)` frame returns a *directional*
+statistic and an *axial* one, and the pair sorts a run into three regimes — sign-free, a real sign
+problem, or a phase problem no rotation reaches. **The sign problem is the rank-one case of a phase
+problem**: rank one in the plane means the phase takes two values `pi` apart, and a phase confined
+to `Z2` is what a sign *is*.
+
+The reading is scored against an independent oracle computed from the Hamiltonian, and the two
+sides share no information — the oracle sees `K` and never a configuration, the read sees two
+logged columns and never `K`. They agree on **15 of 15 lattices**. The physics underneath is the
+lockstep: a configuration's weight is a product of two determinants, one per spin channel, and at
+half filling they cross the sign boundary together — on around 11% of configurations at
+`beta = 12`, on exactly the same ones — so the product's sign never changes. Doping desynchronises
+them, and the fraction on which they disagree *is* the sign problem, exactly.
 
 Throughout, the object read is the standard **spin decoupling** of the Hubbard interaction. That
 qualifier is measured rather than conventional, and where it binds is stated below: the sign
 problem is a property of a Hamiltonian *and* a decoupling, and so is the reading of it.
 
 This repository holds the paper, the reads, and the determinantal quantum Monte Carlo machinery
-behind the [Entroptics](https://github.com/Agience/entroptics) reading of the fermion sign problem.
+they run on.
 
 ## The result
 
 **The sign problem is the loss of a synchrony, and the synchrony is measurable.**
 
-A negative weight is, by definition, a configuration on which the two channels' determinant signs
-disagree. What is not a definition is that the disagreement has structure. Measured on 600
+A negative weight is a configuration on which the two channels' determinant signs disagree --
+arithmetic, immediate from the product. What is not immediate is that the disagreement has
+structure. Measured on 600
 configurations per row, both channels read separately in the numerically conditioned frame:
 
-| beta | mu | flip rate per channel | agree | disagree | = neg fraction |
-|---|---|---|---|---|---|
-| 4 | 0.0 | 0.003 ± 0.001 | **1.0000 ± 0.0000** | 0.0000 | exact |
-| 8 | 0.0 | 0.040 ± 0.006 | **1.0000 ± 0.0000** | 0.0000 | exact |
-| 12 | 0.0 | **0.116 ± 0.011** | **1.0000 ± 0.0000** | 0.0000 | exact |
-| 6 | 0.4 | 0.010 ± 0.004 | 0.9837 ± 0.0030 | **0.0163** | exact |
-| 8 | 0.4 | 0.020 ± 0.002 | 0.9620 ± 0.0068 | **0.0380** | exact |
-| 12 | 0.4 | 0.048 ± 0.010 | 0.9183 ± 0.0129 | **0.0817** | exact |
+| beta | mu | up flips | dn flips | agree | disagree | = neg fraction |
+|---|---|---|---|---|---|---|
+| 4 | 0.0 | 0.0020 ± 0.0018 | **0.0020** | **1.0000 ± 0.0000** | 0.0000 | exact |
+| 8 | 0.0 | 0.0400 ± 0.0097 | **0.0400** | **1.0000 ± 0.0000** | 0.0000 | exact |
+| 12 | 0.0 | **0.1120 ± 0.0103** | **0.1120** | **1.0000 ± 0.0000** | 0.0000 | exact |
+| 6 | 0.4 | 0.0093 ± 0.0025 | 0.0093 | 0.9847 ± 0.0027 | **0.0153** | exact |
+| 8 | 0.4 | 0.0220 ± 0.0040 | 0.0200 | 0.9647 ± 0.0079 | **0.0353** | exact |
+| 12 | 0.4 | 0.0413 ± 0.0077 | 0.0417 | 0.9283 ± 0.0049 | **0.0717** | exact |
 
 The half-filled rows establish two things together. The individual channels **do** change sign —
-on around 12% of configurations — so the lockstep is not vacuous. And they change sign on
+on around 11% of configurations — so the lockstep is not vacuous. And they change sign on
 **exactly the same configurations**: that column is `1.0000` with zero spread across seeds, not a
-number that averages to it. The doped rows establish
-the third: the disagreement fraction equals the negative-weight fraction exactly, everywhere.
+number that averages to it. The doped rows add the third: the disagreement fraction equals the
+negative-weight fraction exactly, everywhere.
 
 **The lock is lockstep, not avoidance.** A symmetry could protect positivity by keeping
 configurations away from the boundary where a determinant vanishes, or by making both channels
@@ -56,8 +71,8 @@ The channels' alignment is directly measurable. The Entroptics coupling read, st
 its own exact re-pairing null with no constant supplied, returns
 
 * **exactly `-1.0000`** where the lockstep is perfect — recovering the particle-hole identity
-  `G_up[i,i](x) + G_dn[i,i](x) = 1`, which holds configuration by configuration to a maximum
-  residual of **6.7e-15**;
+  `G_up[i,i](x) + G_dn[i,i](x) = 1`, which holds configuration by configuration at a maximum
+  residual of **4.9e-15** at `beta = 2`, rising to `1.2e-12` at `beta = 8`;
 * a continuous departure from `-1` as the lockstep breaks, at **|z| = 137** against a permuted
   control at `|z| <= 1.7`;
 * and it does so **while the average sign is still identically 1.00000 +- 0.00000**.
@@ -93,9 +108,9 @@ leaves the lattice bipartite and the filling at exactly one per site — satisfy
 conditions usually stated — and breaks the identity anyway, because a diagonal term cannot be
 negated by signs.
 
-Twenty-four one-body matrices, agreeing with the measured identity on every one, including cases
+Sixty-nine one-body matrices, agreeing with the measured identity on every one, including cases
 chosen so the criterion has to predict rather than describe: bond-disordered lattices with every
-bond drawn at random and no symmetry designed in (residual `1e-13`), a **star graph** — a tree with
+bond drawn at random and no symmetry designed in (residual `5e-14` to `1e-12`), a **star graph** — a tree with
 no cycles and nothing lattice-like about it — and frustrated topologies where it must fail.
 
 **The two routes are not interchangeable, and only one supplies the calibration.** Both give the
@@ -135,8 +150,8 @@ identity, and produce no negative weight at all.
 **The two routes are not equivalent, and only one carries positivity.** Route A leaves the weights
 real — at flux `π/4` on an even ring the identity holds to `2e-14` and the mean phase is exactly 1.
 Route B restores the identity on an **odd** cycle and leaves a phase behind: threading a frustrated
-ladder takes the identity from broken to `8e-14` and the sign quality from `0.060` to **`0.522`**,
-nine times worse. So the criterion decides the **identity**, and the identity delivers positivity
+ladder takes the identity from `1.2e+01` to `4.3e-14` and the sign deficit from `0.19000` to
+**`0.50071`**. So the criterion decides the **identity**, and the identity delivers positivity
 only where the weights are real. An odd cycle has no flux-free route, so it can be made to satisfy
 the identity and cannot be made positive this way.
 
@@ -149,7 +164,7 @@ will.
 
 Everything above decides the identity from `K` — build the support graph, two-colour it, check the
 flux on every odd cycle. A running simulation does not have a clean `K` to hand; it has
-configurations and determinants. Read as a statement about **data**, §3's identity says that across
+configurations and determinants. Read as a statement about **data**, §4's identity says that across
 configurations
 
 ```
@@ -162,14 +177,14 @@ affine relation saturates a normalised alignment at 1; a broken identity cannot.
 
 | | `1 − \|strength\|` |
 |---|---|
-| identity holds (7 lattices) | `0` to `2.2e-16` — machine epsilon |
-| identity fails (8 lattices) | `1.0e-3` to `2.9e-2` |
+| identity holds (8 lattices) | `0` to `2.2e-16` — machine epsilon |
+| identity fails (7 lattices) | `1.0e-3` to `2.9e-2` |
 
 **It agrees with the measured identity on 15 of 15 lattices, and with the algebraic criterion on 15
 of 15, using no Hamiltonian.** The two sides share no information: `coupling` sees two columns and
 never sees `K`; the criterion sees `K` and never sees a configuration. The departure is systematic
 rather than sampling — across a factor of four in sample size and three seeds, the saturated
-lattices stay at machine zero and the broken ones stay at `9.2e-4` to `8.5e-3` without shrinking.
+lattices stay at machine zero and the broken ones stay at `9.8e-4` to `1.4e-2` without shrinking.
 
 **To use it**, log two scalars per configuration — both already computed by any DQMC code:
 `ln|det_up| − ln|det_dn|` from the `slogdet` formed every sweep, and `Σx` over the auxiliary field.
@@ -210,16 +225,16 @@ alignment, and how far it falls short is that weight and nothing else.
 
 **No read of the channel relation can see a phase problem.** Route B restores the identity on an
 odd cycle by threading it with flux, and the two channels then satisfy `G_dn = 1 - G_up` to machine
-precision — while the weight carries a phase. Three systems with an exact relation, an identical
-saturated read, and sign deficits of **0.000, 0.156 and 0.478**. The relation holds whether the
-weight is positive or spread across the circle, so the comparison is well posed and blind. The
-screen's `match` behaves better than the coupling on other cases and is blind here in the same way.
+precision — while the weight carries a phase. Four systems with an exact relation, an identical
+saturated read, and sign deficits of **0.00000, 0.09241, 0.15581 and 0.46110**. The relation holds whether
+the weight is positive or spread across the circle, so the comparison is well posed and blind.
 
 **Outside real determinantal weights the correspondence between saturation and sign-freedom fails
-in both directions, and we give the reason.** Put to a third positivity mechanism — conjugate pairing under time reversal, where the
-weight is `|det|^2` — the read does *not* saturate although the model is sign-free; and on the
-matched control, which carries up to **37.5%** negative weight, it reads exactly `1.0000`. The
-second half is an impossibility rather than a limitation: there the two channels are bit-identical,
+in both directions, and the reason is given.** Put to a third positivity mechanism — conjugate
+pairing under time reversal, where the weight is `|det|^2` — the read does *not* saturate although
+the model is sign-free; and on the matched control, which carries up to **37.5%** negative weight,
+it reads exactly `1.0000`. The second half is an impossibility: there the two channels are
+bit-identical,
 so every statistic of the pair is a statistic of one channel, and no comparison *between* channels
 can reach a sign problem that lives in a phase common to both.
 
@@ -237,21 +252,22 @@ four percent apart, neither fitted, both fixed before any determinant is formed.
 
 ## What a read of this problem can carry
 
-Three families, and the classification is closed rather than a list of things not yet tried. The
-first two are proofs.
+Three families were put to the question. The first two are proofs.
 
 | family | status |
 |---|---|
-| aggregate signed configurations | **capped** at `n·<sgn>²` |
+| reweight by the sign | **capped** at `n·<sgn>²` |
 | read the relation between the two channels | **blind**, two ways |
-| read one channel alone | **no indicator**, measured |
+| read one channel alone | **measured: no ordering across lattices** |
 | identify an operator from a correlation sequence | not excluded by any of the above |
 
 **The ceiling** is the sign problem restated. Correct importance sampling draws at `|w|`, so a
 configuration enters any weighted average carrying only its sign, and Kish's effective sample size
 of those weights is exactly `n·<sgn>²` — a property of the *weights*, so it bounds every
-aggregation of them. That is why the order parameter above detects onset and cannot report
-severity: not a limitation of the read, a consequence of its kind.
+estimator that reweights by them. The order parameter above does not reweight — it is an
+unweighted statistic of the configurations the `|w|` chain visits — which is why it is readable
+where `<sgn>` is not. What stops it reporting severity is its own bound: the deficit lies in
+`[0, 2]` and `-ln<sgn>` does not.
 
 **The blindness** is two separate statements. Where the two channels coincide as data, nothing
 remains to compare. Where they are distinct and *exactly related* — at `5e-15` — the comparison is
@@ -259,9 +275,9 @@ well posed and still carries nothing, because the relation holds whether the wei
 spread across the circle.
 
 The last row survives for a structural reason: identifying an operator from a correlation sequence
-aggregates no signed configuration and compares no channels. That is a statement about where to
-look, not a result — what it costs to identify such an operator from data a sign problem permits is
-not settled here.
+aggregates no signed configuration and compares no channels. It is a place to look rather than a
+result — what it costs to identify such an operator from data a sign problem permits is not settled
+here.
 
 ## Layout
 
@@ -270,8 +286,91 @@ not settled here.
 | [`research/PAPER.md`](research/PAPER.md) | the paper |
 | [`research/code/`](research/code) | the determinantal QMC machinery the reads run on |
 | [`research/code/reads/`](research/code/reads) | the reads — the result this repository is named for |
-| [`research/code/closed/`](research/code/closed) | the structural constraints of §8, each measured with its mechanism |
+| [`research/code/closed/`](research/code/closed) | the structural constraints of §9, each measured with its mechanism |
 | [`research/code/tests/`](research/code/tests) | the gates |
+| [`research/code/entroptics_adapter.py`](research/code/entroptics_adapter.py) | the one way in to the instrument — each read under the paper's name for it, and the version pin |
+| [`research/lean/`](research/lean) | the machine-checked algebraic core of §11 |
+
+Of the 47 experiments the paper cites, 26 read through Entroptics and 21 do not, and all three
+gates cited in the text are instrument-free. §§3–5 derive and verify the identity and its
+criterion from the one-body matrix alone, §7 reads the same systems from their output, and the two
+share no code. They agree on 15 of 15 lattices.
+
+Every Entroptics read goes through the adapter, and a gate refuses any file that imports the
+library directly. The adapter adds no arithmetic: `test_entroptics_adapter.py` asserts each read *is*
+the library call it names, value for value, with a negative control that makes the comparison able
+to fail. What it does add is the naming — `channel_alignment` rather than `reads.coupling` — the
+version pin read from `requirements.txt`, and the two calls that look right and are not.
+
+## What is proved rather than measured
+
+The results here are measurements, and a measurement is not a theorem. But a few of the paper's
+statements are algebra, and a few of *those* are universally quantified — "at any size", "on any
+graph", "for every exponent" — where the text supports them with a sweep. A sweep says no case it
+tried was a counterexample. It does not say none exists.
+
+Those are machine-checked in Lean 4 / Mathlib under [`research/lean/`](research/lean): 80 theorems
+across twelve modules, `sorry`-free, declaring no axiom of their own, every one elaborating against
+the three foundational axioms. They cover the model's algebra and, in `Alignment.lean`, what the
+read itself guarantees — that it is invariant to the offset and scale §4's identity carries, so the
+criterion can run on output with no Hamiltonian; that saturation is *equivalent* to an exact affine
+relation; and that the deficit cannot leave `[0, 2]`, which is why §7 detects onset and not severity.
+The two that move from a sweep to a proof are
+
+* **the closed door on doping** — a diagonal conjugation leaves `K_ii` where it was, so both routes
+  demand `K_ii = -K_ii`; with `K` Hermitian that forces zero. The paper measures 84 flux values
+  across four graphs; `doping_closes_both_routes` quantifies over every lattice, every `K`, every
+  flux and every size.
+* **magnitude blindness at every exponent** — measured at `q = 0.5, 1, 2, 3`;
+  `sum_abs_pow_blind` covers every real `q`, so the cube is provably as blind as the square. Its
+  companion `coupling_is_not_blind` carries the scope: the two-sided read is *not* blind, which is
+  what makes this a statement about magnitude reads and not about the instrument.
+
+§11 of the paper has the full correspondence table and says what the Lean development deliberately
+does not cover — which is everything read from a running sampler.
+
+## Running it
+
+Everything runs from `research/code`, which has to be on the import path: a bare
+`python reads/<file>.py` puts `reads/` there instead and fails on `import dqmc`. Nothing else is
+needed -- the files that reach into `tests/` or `closed/` bootstrap those themselves.
+
+```sh
+cd research/code
+PYTHONPATH=. python tests/gate_fast.py                    # a gate, ~40 s
+PYTHONPATH=. python tests/validate.py                     # the sampler against enumeration, ~2 s
+PYTHONPATH=. python reads/expBA_oracle_superset.py        # the criterion against the identity
+PYTHONPATH=. python -m pytest tests -q                    # the suite: 495 tests
+```
+
+On Windows `cmd` use `set PYTHONPATH=.` on its own line first; in PowerShell, `$env:PYTHONPATH='.'`.
+
+The suite is real computation rather than filesystem checks, so its runtime is the machine's: two
+measured runs on a 22-core box took **5m42s and 12m00s**, and a laptop will be slower. Nothing in it
+is skipped for want of data — every experiment here generates its own configurations from a seed.
+
+Reproducing the reads needs [entroptics](https://github.com/Agience/entroptics) 0.2.3 or later;
+the sampler, the criterion and the gates need only numpy and scipy. Seven experiments run past ten
+minutes and are meant to be run when their section is being checked, not routinely.
+
+Two wrappers hold the question of which machine runs the expensive work, so it is answered once
+rather than in every caller. Both default to this one, so a fresh clone reproduces everything with
+nothing configured:
+
+```sh
+python research/code/remote_run.py --describe                       # where would a run go?
+python research/code/remote_run.py --module pytest tests -q         # the suite, wherever that is
+python research/code/lean_build.py                                  # the proofs, wherever that is
+```
+
+Point them somewhere with a compute host by copying `research.local.env.example` to
+`research.local.env` (git-ignored) and filling in `COMPUTE_*` and `LEAN_BUILD_*`. A remote run ships
+the sources and runs them there, so what runs is what is in your tree; there is no data store to
+move, because every experiment here generates its own configurations from a seed.
+
+Checking the proofs needs [Lean 4 and `elan`](https://leanprover-community.github.io/get_started.html).
+`lake exe cache get` in `research/lean` fetches the prebuilt Mathlib, which takes about a minute;
+building from source instead takes hours.
 
 ## The gates
 
@@ -283,14 +382,19 @@ it looks like a result. Every gate carries a negative control that makes it able
 | `validate.py` | the sampler's weight and propagator against brute-force enumeration of every auxiliary field — 5e-15 | fails at 3e-1 |
 | `test_lockstep.py` | at half filling the channels agree on every configuration while individually flipping | doping breaks it, and the break equals the negative fraction |
 | `test_conditioned_frame.py` | two independent routes to the sign agree; the answer does not move with the stabilisation block | the naive product reports a 50.75% negative fraction at half filling, where positivity is provable |
-| `gate_fast.py` | the vectorised walker IS the reference walker at one walker, bit for bit — 5.9e-14 | the finite-temperature Green's convention gives 3.2e+01 |
-| `gate_multi_k2.py` | multi-determinant overlap AND energy against exact sector arithmetic — 5e-16 | the k = 1 gate alone passes over a two-body error of 6-31% |
+| `gate_fast.py` | the vectorised walker *is* the reference walker at one walker, bit for bit — 5.7e-14 | the finite-temperature Green's convention gives 3.2e+01 |
+| `gate_multi_k2.py` | multi-determinant overlap *and* energy against exact sector arithmetic — 5e-16 | the k = 1 gate alone passes over a two-body error of 6-31% |
 | `test_identity.py` | the identity, and that a *neighbouring* interaction's constant must fail it | borrowing a lambda 47% away fails by fourteen orders |
 | `test_representation_independence.py` | the identity holds in both field distributions with each one's own constant | each representation's constant fails in the other, four percent away |
 | `test_two_mechanisms.py` | the two sign-free mechanisms read `-1` and `+1`, asserted together | doping must desaturate the repulsive read and leave the attractive one |
 | `test_boundary.py` | saturation is neither necessary nor sufficient outside real weights | an inert twist, and a 2-wide lattice, must be refused |
 | `test_representation.py` | the read spans its full range where the physics is fixed | the effective sample size must stay too small to permit a reweighted quantity |
 | `test_capability_across_representations.py` | the deficit is monotone, resolved and reproducible in both fields | it must stop being reproducible at the onset of the sign problem |
+| `gate_main.py` (gate 1) | the complex-Langevin analytic drift against a central finite difference of the complexified action — 7.4e-10 spin, 1.4e-09 charge | the wrong convention (`G_ii` for `1 - G_ii`) fails at 0.40 and 0.36 |
+| `test_nstab_is_safe.py` | the hand-picked stabilisation block against `n_stab = 1`, on the log weight as well as the sign | removing the stabilisation entirely must make the discrepancy appear |
+| `test_entroptics_adapter.py` | every adapter read *is* the library call it names, value for value | comparing against a different argument must fail, or the equality proves nothing |
+| `test_the_instrument_is_reached_through_the_adapter.py` | no file imports the instrument directly, over the AST rather than a regex | all five import spellings must be detected, including the dynamic one |
+| `test_the_read_has_the_proved_properties.py` | the read obeys the three properties `Alignment.lean` proves of it — offset and scale invariance, saturation exactly on affine data, the `[0, 2]` bound — each to 1e-12 | an uncentred cosine must fail the invariance, and unrelated columns must not saturate |
 
 ## No fit, no force, no constant
 

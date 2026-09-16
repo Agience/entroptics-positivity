@@ -20,7 +20,7 @@ nothing here is compared to a figure from another rig.
 WHY THE UNDEFORMED POINT MATTERS, AND HOW THE CASE WAS CHOSEN.  A shift can only help where there
 is a phase problem to help with.  Run at a point whose mean phase is already ~1, any shift appears
 to "do nothing" for a trivial reason and the scan says nothing at all.  That is not hypothetical:
-`4x4` at `mu = 0` is half filling on a bipartite lattice, which section 4 shows is sign-free, and a
+`4x4` at `mu = 0` is half filling on a bipartite lattice, which section 5 shows is sign-free, and a
 scan there returns a perfect undeformed value that every shift can only spoil.
 
 So the point is chosen by MEASURING the undeformed phase first.  Of the cases probed, `4x4` at

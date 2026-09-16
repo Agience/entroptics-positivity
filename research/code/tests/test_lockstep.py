@@ -123,7 +123,7 @@ def test_particle_hole_identity_holds_configuration_by_configuration():
 
 # ── the estimate/identity split, gated ───────────────────────────────────────
 #
-# §2's table has two kinds of column and they must not be confused.  The flip RATE is a proportion
+# §3's table has two kinds of column and they must not be confused.  The flip RATE is a proportion
 # of finite draws and varies with the seed; the AGREEMENT is an exact per-configuration fact and
 # does not.  A suite that pinned the rate would pin a fluctuation, and one that let the agreement
 # drift below 1 would have lost the result.
@@ -177,7 +177,7 @@ def test_the_flip_rate_is_an_estimate_and_is_not_pinned():
     agrees = [r[2] for r in rows]
     spread = max(ups) - min(ups)
     # Against the AGREEMENT column measured on the same draws, which is an identity and carries
-    # exactly zero spread. That contrast is §2's point, and it is what `> 0.01` stood in for.
+    # exactly zero spread. That contrast is §3's point, and it is what `> 0.01` stood in for.
     assert max(agrees) - min(agrees) == 0.0, f"the agreement column is no longer exact: {agrees}"
     assert spread > max(agrees) - min(agrees), \
         f"the flip rate no longer varies across seeds ({ups}); re-examine what precision is real"

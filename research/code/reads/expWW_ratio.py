@@ -23,9 +23,12 @@ POSITIVE, hence the signs lock; and its exponent is a sum over L*N field compone
 Measured here, with nothing fitted:
 
   1. Is R(x) > 0 on every configuration at half filling?  (It must be, or expVV is wrong.)
-  2. Is ln R(x) an exact linear function of sum x?  Reported as the residual of
-     `ln R + 2 lambda sum x`, which is zero if the identity holds -- NOT a fitted slope.  The
-     coefficient is predicted from the decoupling, not measured from the data.
+  2. Is ln R(x) an exact affine function of sum x?  Reported as the residual of section 4's
+     identity, `ln|det(I+B_up)| - ln|det(I+B_dn)| = -dtau L tr(K) + lambda sum x`, which is zero
+     if it holds -- NOT a fitted slope.  Both the coefficient and the offset are predicted from
+     the decoupling.  The 2-lambda column beside it is the CONTROL: the ratio of the B matrices
+     carries 2 lambda and no trace term, so using it here has to fail, and a relation that held
+     for any coefficient would be vacuous.
   3. Doped, where does it break?  The same residual, which should stop being zero.
 
 If (2) holds the sign problem's absence at half filling is a one-line identity, and its presence
@@ -62,14 +65,15 @@ if __name__ == "__main__":
     print("(lambda = arccosh(exp(dtau U / 2)), B_dn(x) = B_up(-x)), never fitted to the data.")
     print()
     print(f"{'beta':>5} {'mu':>5} | {'R > 0 always':>13} {'ln R spread':>12} | "
-          f"{'residual max':>13} {'residual med':>13} {'holds':>7}")
+          f"{'resid, lambda':>14} {'resid, 2 lambda':>16} {'holds':>7}")
     for beta in (2.0, 4.0, 6.0, 8.0, 10.0):
         L = int(round(beta / dtau))
         lam = float(np.arccosh(np.exp(dtau * U / 2.0)))
         for mu in (0.0, 0.4):
             m = Model2D(Lx=Lx, Ly=Ly, t=1.0, mu=mu, U=U, dtau=dtau, L=L, theta=0.0)
             rng = np.random.default_rng(int(beta * 100 + mu * 10))
-            pos, lnR, res = 0, [], []
+            pos, lnR, res, wrong = 0, [], [], []
+            trK = float(np.trace(m.K))
             for _ in range(n_draw):
                 X = rng.choice([-1.0, 1.0], size=(m.L, m.N))
                 o = log_dets(m, X)
@@ -77,13 +81,28 @@ if __name__ == "__main__":
                 sd, ld = o[-1]
                 pos += int(su * sd > 0)
                 lnR.append(ld - lu)
-                # the PREDICTED identity, with no free parameter
-                res.append(abs((ld - lu) + 2.0 * lam * float(X.sum())))
-            lnR, res = np.array(lnR), np.array(res)
+                # SECTION 3'S IDENTITY, in the form `tests/test_identity.py` asserts it:
+                #
+                #     ln|det(I + B_up)| - ln|det(I + B_dn)| = -dtau * L * tr(K) + lambda * sum(x)
+                #
+                # Both parts of the right-hand side matter and this file used to carry neither.
+                # What it computed was `|(ld - lu) + 2 lambda sum(x)|` -- the ratio of the B
+                # MATRICES, whose coefficient is 2 lambda and which has no trace term. That is the
+                # intermediate step of the derivation, not its conclusion: `det(I + B)` is not
+                # `det(B)`, so the residual never went to machine precision and every row printed
+                # "no" for a relation the gate holds at 1e-10. The numbers it produced are the
+                # WRONG-coefficient control, which is the second row of section 4's table, and the
+                # correct-coefficient row had nothing producing it at all.
+                base = -dtau * m.L * trK
+                res.append(abs((lu - ld) - (base + lam * float(X.sum()))))
+                wrong.append(abs((lu - ld) - (base + 2.0 * lam * float(X.sum()))))
+            lnR, res, wrong = np.array(lnR), np.array(res), np.array(wrong)
             holds = "YES" if res.max() < 1e-8 else "no"
             print(f"{beta:5.1f} {mu:5.2f} | {pos/n_draw:13.4f} {lnR.std():12.4f} | "
-                  f"{res.max():13.4e} {np.median(res):13.4e} {holds:>7}", flush=True)
+                  f"{res.max():14.4e} {wrong.max():16.4e} {holds:>7}", flush=True)
     print()
     print("'R > 0 always' must be 1.0000 at half filling -- that IS the lockstep, restated.")
-    print("If 'residual' is at machine precision there, the lockstep is a one-line identity and")
-    print("the sign problem is exactly the failure of that identity under doping.")
+    print("'resid, lambda' at machine precision there is the one-line identity, and the sign")
+    print("problem is exactly the failure of that identity under doping.  'resid, 2 lambda' is")
+    print("the control: a relation that held for ANY coefficient would be vacuous, so the wrong")
+    print("one has to fail, and it does -- by fourteen orders on the same configurations.")

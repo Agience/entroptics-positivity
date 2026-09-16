@@ -17,6 +17,15 @@ mixture would show up while the overlap stayed right.
 """
 from __future__ import annotations
 
+import pathlib as _pathlib
+import sys as _sys
+
+# `expGG_nonorthogonal` is a sibling of this file's parent, under `closed/`.  A bare import finds
+# it only when that directory is already on the path, so a plain `python tests/gate_multi_k2.py`
+# fails.  The package-style form is not available either: an unrelated installed package is also
+# named `tests`, and `closed` is not a package.
+_sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parent.parent / "closed"))
+
 import numpy as np
 from scipy.sparse import kron as skron, identity, csr_matrix
 

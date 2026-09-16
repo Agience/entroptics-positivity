@@ -1,9 +1,9 @@
 """Experiment AI -- a phase is not a parity, and the same physics can have either.
 
-Section 7 argues that no continuous summary determines the sign, because the sign is a PARITY and
-a parity is not a continuous function of anything.  The boundary found in section 5 raises the
+Section 8 argues that no continuous summary determines the sign, because the sign is a PARITY and
+a parity is not a continuous function of anything.  The boundary found in section 7 raises the
 other case: when the weight is complex the sign problem is a PHASE, which is continuous, so that
-argument does not reach it and section 7 is incomplete as written.
+argument does not reach it and section 8 is incomplete as written.
 
 The cleanest instrument for this is already in the model.  Both of these are exact identities on
 the four states of a site,
@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
@@ -67,7 +67,7 @@ def sweep(theta, beta, mu=0.0, U=4.0, dtau=0.125, Lx=2, Ly=4, n_draw=400, seed=0
     ess = float(aw.sum() ** 2 / (aw ** 2).sum()) if aw.sum() > 0 else 0.0
     phase = W / np.where(aw > 0, aw, 1.0)
     mean_phase = complex((aw * phase).sum() / aw.sum()) if aw.sum() > 0 else 0j
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     return dict(ess=ess, n=n_draw,
                 # |Im w| / |w|, BOUNDED BY 1.  An earlier version used |Im w| / |Re w|, which is
                 # unbounded and blows up whenever Re w passes near zero -- exactly what a weight
@@ -132,3 +132,42 @@ if __name__ == "__main__":
     print("magnitude.  There the sign problem is a PHASE problem, which the negative-fraction")
     print("column cannot describe, and at theta = 1 the read is saturated at exactly +1.0000")
     print("because the two channels coincide.")
+
+    # ------------------------------------------------------------------------------------------
+    # THE DECOUPLING ITSELF, BEFORE ANY LATTICE.  Section 9.3's claim that the scalar family is
+    # complete rests on two rewritings of `n_up n_dn` being EXACT at every mixing, and the paper
+    # quotes a worst relative error for that.  `model2d.single_site_identity` computes it and
+    # nothing printed it, so the figure had no producer and its grid was not stated -- which
+    # matters, because the number is a property of the grid: one cell reads 3.5e-16 and the sweep
+    # below reads more.  Gauss-Hermite on ONE site, all four occupation states, no lattice and no
+    # sampling: if the algebra fails here nothing downstream can be right.
+    # ------------------------------------------------------------------------------------------
+    from model2d import single_site_identity
+
+    print()
+    print("=" * 112)
+    print("THE SCALAR DECOUPLING, CHECKED BY QUADRATURE ON A SINGLE SITE AT EVERY MIXING")
+    print("40 Gauss-Hermite nodes; exact vs quadrature for each of the four |n_up, n_dn> states.")
+    print("=" * 112)
+    worst, where = 0.0, None
+    cells = 0
+    for U_q in (2.0, 4.0, 8.0):
+        for dtau_q in (0.0625, 0.125, 0.25):
+            for theta_q in (0.0, 0.25, 0.5, 0.75, 1.0):
+                cells += 1
+                for nu, nd, exact, quad in single_site_identity(U_q, dtau_q, theta_q):
+                    rel = abs(complex(quad) - float(exact)) / abs(float(exact))
+                    if rel > worst:
+                        worst, where = rel, (U_q, dtau_q, theta_q, nu, nd)
+    print(f"  {cells} (U, dtau, theta) cells x 4 states")
+    print(f"  worst relative error   {worst:.3e}")
+    print(f"  at                     U = {where[0]}, dtau = {where[1]}, theta = {where[2]}, "
+          f"n_up = {where[3]}, n_dn = {where[4]}")
+    # One cell alone, printed so that the grid-dependence of the figure above is visible rather
+    # than asserted: the worst case over 45 cells is not what any single cell reads.
+    one = max(abs(complex(q) - float(e)) / abs(float(e))
+              for _nu, _nd, e, q in single_site_identity(4.0, 0.0625, 0.5))
+    print(f"  one cell (U = 4, dtau = 0.0625, theta = 0.5) alone: {one:.3e}")
+    print()
+    print("  Every theta is exact, so the mixing between the spin and charge channels is the whole")
+    print("  freedom there is: the family is closed, and sweeping theta sweeps all of it.")

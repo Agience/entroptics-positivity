@@ -1,4 +1,4 @@
-"""§5's CAPABILITY claim, gated in both representations.
+"""§7's CAPABILITY claim, gated in both representations.
 
 The claim that would be USED is not that the coupling reads -1 at the symmetric point; it is that
 along beta at fixed filling the deficit from saturation moves, monotonically and resolved, where

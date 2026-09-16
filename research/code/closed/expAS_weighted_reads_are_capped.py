@@ -1,6 +1,6 @@
 """Experiment AS -- every weighted read is capped by the sign problem, exactly.
 
-Section 5 records that the coupling read detects ONSET and not SEVERITY.  This file gives the
+Section 7 records that the coupling read detects ONSET and not SEVERITY.  This file gives the
 reason, and it is structural rather than a property of that particular read.
 
 For correctly importance-sampled configurations the sampling is done at `|w|`, so each
@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 
 
 def sign_weights(n, p_plus, seed):
@@ -48,11 +48,11 @@ if __name__ == "__main__":
         for p in (0.999, 0.75, 0.55, 0.505):
             w = sign_weights(n, p, seed=int(1000 * p) + n)
             X = rng.standard_normal((n, 8))
-            c = E.carriage(X, w)
+            c = EA.evidence_ceiling(X, w)
             pred = n * float(w.mean()) ** 2
             print(f"{n:7d} {float(w.mean()):9.4f} | {c.effective_n:21.4f} {pred:12.4f} "
                   f"{c.effective_n / pred if pred > 0 else float('nan'):8.4f}", flush=True)
         print(flush=True)
     print("The ratio is 1 by construction, and that is the point: the read does not estimate the")
     print("cost, it IS the cost.  A ceiling on the weights binds every aggregation of them, so no")
-    print("weighted read -- including the coupling of section 5 -- can be a severity meter.")
+    print("weighted read -- including the coupling of section 7 -- can be a severity meter.")

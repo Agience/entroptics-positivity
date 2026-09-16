@@ -30,6 +30,15 @@ complexification, and its reads were measured constant to three significant figu
 """
 from __future__ import annotations
 
+import pathlib as _pathlib
+import sys as _sys
+
+# `gate_clangevin` is a sibling of this file's parent, under `tests/`.  A bare import finds it only
+# when that directory is already on the path, so a plain `python closed/<this file>` fails.  The
+# package-style form is not available either: an unrelated installed package is also named `tests`.
+_sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parent.parent / "tests"))
+
+
 import numpy as np
 from scipy.stats import spearmanr
 

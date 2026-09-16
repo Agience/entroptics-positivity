@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from expOO_signlock import sample
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
             m = Model2D(Lx=Lx, Ly=Ly, t=1.0, mu=mu, U=U, dtau=dtau, L=L, theta=0.0)
             A, B, sg, lg = sample(m, n_draw, seed=int(beta * 100 + mu * 10))
             s, ess = mean_sign(sg, lg)
-            c = E.reads.coupling(A, B)
+            c = EA.channel_alignment(A, B)
             rows.append(dict(beta=beta, mu=mu, sgn=s, ess=ess, neg=float(np.mean(sg < 0)),
                              strength=float(c.strength), z=float(c.z), res=int(c.resolved)))
             print(f"{beta:5.1f} {mu:5.2f} | {s:10.5f} {ess:8.1f} {np.mean(sg<0):9.4f} | "

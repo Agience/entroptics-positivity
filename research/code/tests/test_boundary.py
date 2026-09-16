@@ -103,14 +103,14 @@ def test_the_kramers_reading_is_exactly_one_minus_twice_the_imaginary_share(Lx, 
     """G_dn = conj(G_up) makes the real parts exact positives and the imaginary parts exact
     negatives, so a single signed alignment returns +1 - 2r with r the imaginary variance share.
 
-    This is the same formula as §4's route A with one sign changed, and it means the departure
+    This is the same formula as §5's route A with one sign changed, and it means the departure
     from saturation is the frame's imaginary weight rather than a failure of the read. The
     seed-to-seed spread in the boundary table is r's spread.
     """
     r_ = run(Lx, Ly, 8.0, -4.0, 0.0, pp * np.pi, True, seed=seed)
     assert r_["neg"] == 0.0, "this row must be sign-free for the point to hold"
 
-    import entroptics as E
+    import entroptics_adapter as EA
     from reads.expAF_third_mechanism import hop_flux
     from scipy.linalg import expm
     from stable import udt_product, inv_one_plus_block
@@ -136,4 +136,4 @@ def test_the_kramers_reading_is_exactly_one_minus_twice_the_imaginary_share(Lx, 
     Ac = A - A.mean(axis=0, keepdims=True)
     vre = float((Ac.real ** 2).sum()); vim = float((Ac.imag ** 2).sum())
     share = vim / (vre + vim)
-    assert E.reads.coupling(A, B).strength == pytest.approx(1.0 - 2.0 * share, abs=1e-10)
+    assert EA.channel_alignment(A, B).strength == pytest.approx(1.0 - 2.0 * share, abs=1e-10)

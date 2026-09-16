@@ -30,7 +30,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.stats import skew, kurtosis
 
-import entroptics as E
+import entroptics_adapter as EA
 from dqmc import Model, ExactTrotter
 from sampler_stable import StableChains
 
@@ -64,6 +64,12 @@ def exact_trace(m):
     return np.einsum("lii->l", P) / m.N
 
 
+#: Collected across every row so the two comparisons section 9.7 quotes are printed once, as
+#: ranges, rather than asserted in prose.
+CENTRE_GAP: list[float] = []
+FRAME_GAP: list[float] = []
+
+
 if __name__ == "__main__":
     N, U, dtau = 4, 4.0, 0.25
     print("=" * 108)
@@ -87,24 +93,51 @@ if __name__ == "__main__":
             # kurtosis themselves are measurements and are printed beside it; read those.
             natural = "yes" if (sk < 0.5 and ku < 1.0) else "NO"
             raw = W.mean(axis=0)
-            # `E.aperture` is the MODULE; `E.Aperture` is the class. This line read the module and
-            # raised `'module' object is not callable`, so this file could not run at all against
-            # the current library -- found 2026-09-07, while re-measuring the figure S8.7 quotes
-            # from it. Nothing gates this experiment, which is why it went unnoticed.
-            ap = E.Aperture(W)
-            clean, info = ap.extract()
+            # Reached through the adapter, which is also the answer to how this line used to be
+            # wrong: it named the entroptics MODULE where the class was meant and raised
+            # `'module' object is not callable`, so this file could not run at all -- found
+            # 2026-09-07, while re-measuring the figure 8.7 quotes from it. Nothing gates this
+            # experiment, which is why it went unnoticed. One named entry point cannot be
+            # misspelled that way.
+            clean, info = EA.denoise(W)
             clean = np.asarray(clean)
-            # NO RESCALING. `extract` returns `(clean, info)` with `clean` in W's OWN units, and
-            # `clean.mean(axis=0)` IS `info['centre']` -- verified 2026-09-07. The line that used
-            # to stand here re-centred and re-scaled by hand, on a comment saying extract returned
-            # "whitened screen units". That was true of an older library and is not true now, so
-            # the rescaling was a second transformation applied on top of a correct one.
+            # `extract` returns `(clean, info)` with `clean` in W's own units, so it is used as
+            # returned.
             rec = clean
+            # `clean.mean(axis=0)` matches neither the frame mean nor the read's own centre on
+            # these rows. `clean` is the centre plus a shrunk projection onto the resolved modes,
+            # and that projection carries a mean of its own wherever there is structure to resolve.
+            # On a frame with nothing resolvable the projection is empty and `clean.mean` is the
+            # centre to 3e-16, so a check on Gaussian frames reads the two as equal and cannot see
+            # this. These frames carry a correlator. Both gaps are collected, so section 9.7's
+            # claim is a measurement on the data it is about.
+            CENTRE_GAP.append(float(np.abs(rec.mean(axis=0) - np.asarray(info["centre"])).max()))
+            FRAME_GAP.append(float(np.abs(rec.mean(axis=0) - W.mean(axis=0)).max()))
             e_raw = float(np.sqrt(np.mean((raw - truth) ** 2)))
             e_ext = float(np.sqrt(np.mean((rec.mean(axis=0) - truth) ** 2)))
             print(f"{per_block:10d} {24:7d} {sk:8.3f} {ku:10.3f} {natural:>8} "
                   f"{e_raw:10.5f} {e_ext:12.5f} {e_ext/max(e_raw,1e-30):7.3f}", flush=True)
         print()
+    print()
+    print("=" * 108)
+    print("WHAT `extract` RETURNS, AND WHAT IT DOES NOT")
+    print("=" * 108)
+    print(f"  rows                                   {len(CENTRE_GAP)}")
+    print(f"  |clean.mean(axis=0) - info['centre']|   {min(CENTRE_GAP):.1e} to {max(CENTRE_GAP):.1e}")
+    print(f"  |clean.mean(axis=0) - W.mean(axis=0)|   {min(FRAME_GAP):.1e} to {max(FRAME_GAP):.1e}")
+    print()
+    print("  `clean` is neither: it is the centre plus a SHRUNK projection onto the resolved")
+    print("  modes, and that projection carries a mean of its own wherever there is structure to")
+    print("  resolve.  On a frame with nothing resolvable the projection is empty and the first")
+    print("  row above would read 3e-16 -- which is what a check on Gaussian noise returns, and")
+    print("  why that check cannot stand in for this one.")
+    print()
+    print("  Optimal singular-value shrinkage is the right operation for recovering a low-rank")
+    print("  signal and the wrong one for an unbiased mean: it shrinks the mean-carrying mode")
+    print("  along with everything else.  That is why section 9.7 reports `extract` as the wrong")
+    print("  tool for this problem -- not because it misreports itself, but because the quantity")
+    print("  it faithfully reports is not the one a sign problem lives in.")
+    print()
     print("'ratio' below 1 is the read beating the raw block mean.  Part 1 found a constant")
     print("factor that turned into a LOSS at high statistics; if the unnatural noise was the")
     print("cause, the rows marked natural should not show that turn.")

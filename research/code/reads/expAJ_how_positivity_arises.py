@@ -28,7 +28,7 @@ means at least one draw was negative-real, not that every draw was real, and on 
 distribution is in fact spread across the circle.  The fraction with a genuine phase is measured in
 AI, where it belongs.
 
-This is what makes the section 7 result mechanical rather than surprising: a read that compares the
+This is what makes the section 8 result mechanical rather than surprising: a read that compares the
 two channels reports the lockstep, and the lockstep is not what carries positivity at the far end
 of the family.
 """

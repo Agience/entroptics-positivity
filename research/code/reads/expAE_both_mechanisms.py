@@ -8,7 +8,7 @@ model is provably sign-free.
 There are two of them, and they are structurally opposite:
 
   REPULSIVE, spin channel, half filling.  `G_dn = 1 - G_up` exactly.  The two channels are exact
-      NEGATIVES about 1/2, and the determinants share a sign through the identity of section 3.
+      NEGATIVES about 1/2, and the determinants share a sign through the identity of section 4.
       Anti-synchronised.
 
   ATTRACTIVE, charge channel, ANY filling.  The field couples to `n_up + n_dn - 1`, so the two
@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
@@ -65,7 +65,7 @@ def read_run(Lx, Ly, beta, U, mu, channel, dtau=0.125, n_draw=300, seed=0):
         A.append(row[+1]); B.append(row[-1]); S.append(s)
         sep.append(float(np.abs(row[+1] - row[-1]).max()))
     A, B, S = np.array(A), np.array(B), np.array(S)
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     # NO FILLING COLUMN.  These are uniform draws over the field, not importance samples, so no
     # expectation value estimated from them means anything -- the same effective-sample collapse
     # that makes the average sign unmeasurable this way.  `mu` is an input and needs no estimator.

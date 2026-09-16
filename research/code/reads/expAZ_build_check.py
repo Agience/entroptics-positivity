@@ -3,7 +3,7 @@
 THE RESULT.  A determinantal QMC run whose lattice is built with an off-by-one wrap -- periodic
 boundaries where open were intended, on an ODD chain -- is running a non-bipartite model.  At
 `beta = 1` to `3` it produces NOT ONE NEGATIVE WEIGHT across three seeds, so every standard health
-check passes, and the criterion of section 4 computed on the INTENDED lattice reports `sign-free`
+check passes, and the criterion of section 5 computed on the INTENDED lattice reports `sign-free`
 because it reads the model rather than the code.  The output-side read fires anyway:
 
     beta    negative fraction (4 seeds)    1 - |strength|      correctly-built control
@@ -14,7 +14,7 @@ because it reads the model rather than the code.  The output-side read fires any
 Eleven orders between the bug and the control at `beta = 2`, and the signal is 5 to 30 times the
 seed spread (`6.32e-05 +- 5.8e-06` at `beta = 2`, `3.34e-04 +- 6.1e-05` at `beta = 3`, four seeds).
 
-WHY THIS READ AND NOT THE DIRECT CHECK.  Section 3's identity can be tested directly --
+WHY THIS READ AND NOT THE DIRECT CHECK.  Section 4's identity can be tested directly --
 
     ln|det_up|(x) - ln|det_dn|(x)  ==  -dtau*L*tr(K) + lambda*sum(x)
 
@@ -46,7 +46,8 @@ THE SCOPE, MEASURED, AND BOTH LIMITS ARE PROVABLE RATHER THAN EMPIRICAL.
         zero and there is no column to correlate.  A degenerate input is visible upstream of the
         read and should be caught there.
 
-HONEST ABOUT THE INSTRUMENT.  At `D = 1` -- two logged scalars, which is this experiment's frame --
+WHAT THE INSTRUMENT SUPPLIES HERE, AND WHAT IT DOES NOT.  At `D = 1` -- two logged scalars, which
+is this experiment's frame --
 `coupling.strength` IS Pearson's r and `z` is `r*sqrt(T-1)`, so `|z|` reads 19.97 on the bug AND on
 the control and does no discriminating here.  What discriminates is saturation against the seed
 spread.  The contribution of this experiment is the METHOD -- that an offset-and-scale-free read of
@@ -64,7 +65,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import expm
 
-import entroptics as E
+import entroptics_adapter as EA
 from stable import udt_product, slogdet_one_plus_block
 from reads.expAO_spectral_criterion import chain, criterion
 
@@ -105,7 +106,7 @@ def run(K_built, *, lam_built=None, drop_sigma=False, beta=6.0, U=U, dtau=DTAU,
 
 def departure(A, B):
     """`1 - |strength|`: zero when the relation is exactly affine, positive when it is not."""
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     return (1.0 - abs(c.strength)) if c.resolved else float("nan"), abs(c.z), c.resolved
 
 

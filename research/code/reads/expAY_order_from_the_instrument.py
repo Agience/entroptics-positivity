@@ -1,6 +1,6 @@
 """Can the instrument choose the model order for a transfer-operator identification?
 
-WHY THIS IS THE ONE WORTH ASKING.  §9's classification closes three rows and leaves one: identifying
+WHY THIS IS THE ONE WORTH ASKING.  §10's classification closes three rows and leaves one: identifying
 an operator from a correlation sequence aggregates no signed configuration and compares no channels,
 so neither the Kish ceiling nor the common-mode blindness applies to it.  The paper is explicit that
 this is where to look and not a result -- what it costs to identify such an operator from data a
@@ -40,7 +40,7 @@ rank one whatever the true order.  Measured on the multi-operator frame: `top_sh
 MODEL ORDER FOR THIS OBJECT IS NOT A CORRELATION-RANK QUESTION.  It lives in the relative SCALE
 structure across lags, which is exactly what correlation normalisation removes.  That is why a
 ninth variance-based criterion would not have worked either, and it is worth having established
-before writing one.  §9's fourth row is not closed by this: the physics argument for it stands, and
+before writing one.  §10's fourth row is not closed by this: the physics argument for it stands, and
 what is now measured is that this instrument family does not answer it and precisely why.
 
 THE REST OF THIS FILE ANSWERS THAT ON DATA WHOSE ANSWER IS KNOWN.  A synthetic sequence
@@ -54,7 +54,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 
 
 def hankel(c, rows=None):
@@ -81,7 +81,7 @@ def sequence(lams, amps, n_tau, noise, seed):
 def order_read_by_the_instrument(c, rows=None):
     """`resolved_modes` on the sequence's Hankel matrix -- the order, chosen by the read."""
     H = hankel(c, rows)
-    return int(E.reads.spectral_optics(H).resolved_modes), H
+    return int(EA.single_channel_optics(H).resolved_modes), H
 
 
 if __name__ == "__main__":

@@ -19,8 +19,8 @@ its median across independent runs separates with no overlap.  That is the same 
 of this paper uses for every sampled figure.
 
 SCOPE.  This separates REAL-weight sign problems at fixed filling.  It does not see a phase
-problem: the route B cases of section 4, whose channels are exactly related and whose weights carry
-a phase, read closed.  That is consistent with section 5 -- the relation between the channels does
+problem: the route B cases of section 5, whose channels are exactly related and whose weights carry
+a phase, read closed.  That is consistent with section 7 -- the relation between the channels does
 not carry the phase, and this read is a statement about each channel against its own zero.
 """
 from __future__ import annotations
@@ -28,7 +28,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import expm
 
-import entroptics as E
+import entroptics_adapter as EA
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
 PARTICLE_HOLE_ZERO = 0.5
@@ -61,7 +61,7 @@ def balance_pvalue(A, B, own_zero=True):
     `own_zero=False` withholds the law and lets the library default to the column mean, which is
     the control: it is what makes the system's own zero the thing being tested.
     """
-    s = E.Screen()
+    s = EA.balance_at_own_zero()
     kw = {}
     if own_zero:
         kw["zero"] = lambda x: np.full(np.asarray(x).shape[1],

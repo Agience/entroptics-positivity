@@ -1,6 +1,6 @@
-"""Experiment AN -- the section 5 capability table, measured over seeds.
+"""Experiment AN -- the section 7 capability table, measured over seeds.
 
-The claim of section 5 is that the coupling's deficit from saturation moves, monotonically and
+The claim of section 7 is that the coupling's deficit from saturation moves, monotonically and
 resolved, in a regime where `<sgn>` is identically 1 and therefore has no derivative to read.  Both
 columns come from the SAME importance-sampled chains at each beta, so this is not two samplers
 being compared.
@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 from dqmc import Model
 from reads.expQQ_coupling_vs_sign import run
 
@@ -38,7 +38,7 @@ def row(beta, seeds=SEEDS, R=64, warm=25, n_meas=40):
     for seed in seeds:
         m = Model(N=N, t=1.0, t2=T2, mu=MU, U=U, dtau=DTAU, L=int(round(beta / DTAU)))
         A, B, S, _ = run(m, R=R, warm=warm, n_meas=n_meas, seed=seed)
-        c = E.reads.coupling(A, B)
+        c = EA.channel_alignment(A, B)
         ds.append(1.0 + float(c.strength)); ss.append(float(S.mean()))
         zs.append(abs(float(c.z))); rs.append(bool(c.resolved))
     return np.array(ss), np.array(ds), np.array(zs), np.array(rs)

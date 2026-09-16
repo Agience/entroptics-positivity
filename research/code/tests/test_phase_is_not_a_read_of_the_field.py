@@ -1,11 +1,11 @@
-"""§5, gated: the phase carries no linear information from the field, asked on the whole field.
+"""§7, gated: the phase carries no linear information from the field, asked on the whole field.
 
 This gates the paper's most load-bearing negative. If `arg(w)` were a function of the field the
 phase could be computed without the determinant, so a weak test here would be the worst weak test
 in the repo -- and the earlier one asked three chosen functionals, which is a guess at a basis.
 
 THE CONTROL IS WHAT MAKES THE NULL MEAN ANYTHING. `ln|det_up| - ln|det_dn|` is an exact affine
-function of `sum(x)` by §3, read on the SAME frames in the same call. It must stand clear of the
+function of `sum(x)` by §4, read on the SAME frames in the same call. It must stand clear of the
 null. A rig where it did not would return a null for the phase for the trivial reason that it
 cannot see a relation of this kind at all, and that is the failure this file exists to exclude.
 
@@ -39,7 +39,7 @@ def scored(name):
 
 @pytest.mark.parametrize("name", [n for n, _ in CASES])
 def test_the_magnitude_ratio_stands_clear_of_the_null(name):
-    """THE POSITIVE CONTROL. §3's relation must be visible to this read on these frames."""
+    """THE POSITIVE CONTROL. §4's relation must be visible to this read on these frames."""
     c = scored(name)["control"]
     assert c is not None, f"{name}: the control produced no reading"
     assert c["carried"] > c["null_max"], \
@@ -58,7 +58,7 @@ def test_the_phase_stays_inside_the_null(name):
         assert d["carried"] <= d["null_max"], \
             f"{name}: {part} arg(w) left the null -- {d['carried']:.4f} against a null reaching " \
             f"{d['null_max']:.4f}. If that survives a refit and more configurations, the phase " \
-            f"carries field information and §5 must be rewritten."
+            f"carries field information and §7 must be rewritten."
 
 
 @pytest.mark.parametrize("name", [n for n, _ in CASES])
@@ -72,7 +72,7 @@ def test_the_control_and_the_phase_are_not_the_same_reading(name):
             continue
         assert c["sigma"] > d["sigma"], \
             f"{name}: the phase reads as strongly as the magnitude ratio ({d['sigma']:+.1f} " \
-            f"against {c['sigma']:+.1f} sigma), which §3 says is an exact relation"
+            f"against {c['sigma']:+.1f} sigma), which §4 says is an exact relation"
 
 
 def test_the_field_basis_contains_the_functionals_section_5_chose():

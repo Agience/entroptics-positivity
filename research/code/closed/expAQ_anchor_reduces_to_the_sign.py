@@ -1,6 +1,6 @@
 """Experiment AQ -- on the anchor, a coupling read IS a reweighted average sign.
 
-Section 8.1 records that reads which score severity from the sampled data reduce to the average
+Section 9.1 records that reads which score severity from the sampled data reduce to the average
 sign under a different, cheaper measure.  The anchor is the case where that reduction can be
 written down and checked exactly: take the two sides to differ by the configuration's own sign,
 
@@ -26,11 +26,11 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 
 
 def anchor(T=500, N=8, p_plus=0.65, seed=0):
-    """A frame and the same frame with row signs applied -- the anchor of section 8.1."""
+    """A frame and the same frame with row signs applied -- the anchor of section 9.1."""
     rng = np.random.default_rng(seed)
     A = rng.standard_normal((T, N))
     sigma = np.where(rng.random(T) < p_plus, 1.0, -1.0)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
           f"{'read':>10} | {'read - weighted':>16} {'read - definition':>18}")
     for seed in (0, 3, 7, 11, 19):
         A, B, sigma = anchor(seed=seed)
-        read = float(E.reads.coupling(A, B).strength)
+        read = float(EA.channel_alignment(A, B).strength)
         wsgn = weighted_sign(A, sigma)
         defn = centred_alignment(A, B)
         print(f"{seed:5d} {float((sigma > 0).mean()):8.4f} | {float(sigma.mean()):10.5f} "

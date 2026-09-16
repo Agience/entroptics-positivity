@@ -1,0 +1,43 @@
+{
+  "title": "Reading Positivity from the Weights Alone",
+  "description": "Given only the weights a running determinantal quantum Monte Carlo simulation already holds -- no Hamiltonian, no knowledge of the decoupling, and no constant chosen by the caller -- what can be decided about its positivity? The answer is a build check a run can perform on itself. An identity between the two spin channels' determinants makes ln|det_up| - ln|det_dn| an exact affine function of the field sum, a normalised alignment saturates on an affine relation and cannot on a non-affine one, and that alignment is invariant to both the offset and the slope, so the check needs neither the decoupling constant nor tr(K) -- only two scalars every determinant QMC code already forms each sweep. On a lattice built with a periodic wrap where an open one was intended, the read fires at beta = 1 to 3 while not one negative weight has appeared and every standard health check passes. A second reading classifies the run from the weight cloud alone: a directional statistic and an axial one sort it into sign-free, a real sign problem, or a phase problem no rotation reaches, and the sign problem is the rank-one case of a phase problem. Each read is identified with the standard statistic it computes. The reading is scored against an independent oracle computed from the one-body matrix, sharing no code with it. The algebraic core -- the log-determinant identity, the positivity criterion and its two routes, the closed door on doping, the effective-sample ceiling, magnitude blindness at every exponent, and what the alignment read guarantees -- is machine-checked in Lean 4 / Mathlib, sorry-free and on the three foundational axioms. Every machine-precision figure quoted in the paper is printed by the named file the paper attributes it to. This repository holds the paper, the Lean verification, the reads, and the determinantal quantum Monte Carlo machinery they run on.",
+  "upload_type": "software",
+  "license": "Apache-2.0",
+  "version": "0.2.0",
+  "creators": [
+    {
+      "name": "Sessford, Ikailo John",
+      "affiliation": "Ikailo Inc.",
+      "orcid": "0009-0002-0150-4027"
+    }
+  ],
+  "keywords": [
+    "fermion sign problem",
+    "determinantal quantum Monte Carlo",
+    "Hubbard model",
+    "strongly correlated electrons",
+    "constrained path",
+    "complex Langevin",
+    "formal verification",
+    "Lean 4",
+    "reproducibility"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Agience/entroptics-sign-problem",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "10.5281/zenodo.22687899",
+      "relation": "references",
+      "resource_type": "software",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "https://agience.ai",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 """S8.7, gated: `extract` against the raw block mean, and the file that measures it must RUN.
 
-This test exists because §8.7 was quoted from an experiment nothing gated, and the experiment
+This test exists because §9.7 was quoted from an experiment nothing gated, and the experiment
 could not execute at all against the current library -- `E.aperture` is the module, not the class,
 and `extract()` returns `(clean, info)` rather than an object with a `.clean`. Two API breaks and a
 figure taken from the single worst row all survived because no gate ever imported this file.
@@ -25,7 +25,7 @@ from functools import lru_cache
 @lru_cache(maxsize=None)
 def grid():
     """The nine rows of S8.7: three (t2, mu, beta) points by three block sizes."""
-    import entroptics as E
+    import entroptics_adapter as EA
     from dqmc import Model
     from reads.expRR_natural_noise import blocks, exact_trace
 
@@ -35,7 +35,7 @@ def grid():
         truth = exact_trace(m)
         for per_block in (2, 8, 32):
             W = blocks(m, 24, per_block, seed=int(beta * 10 + mu * 10 + per_block))
-            clean, info = E.Aperture(W).extract()
+            clean, info = EA.denoise(W)
             clean = np.asarray(clean)
             e_raw = float(np.sqrt(np.mean((W.mean(axis=0) - truth) ** 2)))
             e_ext = float(np.sqrt(np.mean((clean.mean(axis=0) - truth) ** 2)))

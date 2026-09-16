@@ -1,4 +1,4 @@
-"""§4's criterion performed by a read on OUTPUT, gated against the algebraic criterion.
+"""§5's criterion performed by a read on OUTPUT, gated against the algebraic criterion.
 
 The two sides share no information. `coupling` sees two columns per configuration and never sees
 `K`; the algebraic criterion sees `K` and never sees a configuration. Agreement between them is the
@@ -67,7 +67,7 @@ def test_the_read_reproduces_the_measured_identity_on_every_lattice():
 
 
 def test_the_read_reproduces_the_algebraic_criterion():
-    """And therefore agrees with §4, which is the claim that makes it a criterion at all."""
+    """And therefore agrees with §5, which is the claim that makes it a criterion at all."""
     bad = [(n, d, a) for n, d, _, a, _ in scored() if (abs(d) < 1e-9) != a]
     assert not bad, f"the read disagreed with the algebraic criterion on: {bad}"
 

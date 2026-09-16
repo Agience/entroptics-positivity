@@ -1,6 +1,6 @@
-"""§8.2, gated: no read of magnitudes alone can see a sign, at any exponent.
+"""§9.2, gated: no read of magnitudes alone can see a sign, at any exponent.
 
-This is the reason §5 reads a coupling between the two channels rather than a magnitude of either,
+This is the reason §7 reads a coupling between the two channels rather than a magnitude of either,
 so it is worth pinning rather than asserting. `B = diag(sigma) A` leaves every magnitude untouched,
 so every power marginal agrees EXACTLY -- not to a tolerance -- and the singular spectrum agrees
 too because `diag(sigma)` is orthogonal.
@@ -14,7 +14,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import entroptics as E
+import entroptics_adapter as EA
 from closed.expAP_phase_blindness import flipped, magnitude_moments
 
 QS = (0.5, 1.0, 1.5, 2.0, 3.0)
@@ -48,25 +48,29 @@ def test_the_singular_spectrum_is_blind_too(seed):
 def test_the_positive_control_a_coupling_does_see_the_flip():
     """Without this, blindness would be consistent with the frames being indistinguishable."""
     A, B, C = _frames(0)
-    assert E.reads.coupling(A, A).strength == pytest.approx(1.0, abs=1e-9)
-    assert E.reads.coupling(A, C).strength == pytest.approx(-1.0, abs=1e-9)
-    half = E.reads.coupling(A, B)
+    assert EA.channel_alignment(A, A).strength == pytest.approx(1.0, abs=1e-9)
+    assert EA.channel_alignment(A, C).strength == pytest.approx(-1.0, abs=1e-9)
+    half = EA.channel_alignment(A, B)
     # Against the two saturated reads measured on the line above, and against the instrument's own
     # decision -- not against `0.1` and `4.0`, which were levels guessed at for both.
     assert not half.resolved, \
         f"a half-flipped frame resolved: {half.strength:.4f}, |z| = {abs(half.z):.2f}"
-    assert abs(half.strength) < abs(E.reads.coupling(A, C).strength), \
+    assert abs(half.strength) < abs(EA.channel_alignment(A, C).strength), \
         f"a half-flipped frame read as strongly as a fully flipped one: {half.strength:.4f}"
 
 
 # ── the classification's third row: one channel alone carries no indicator ───
 
 def test_a_single_channel_read_does_not_track_the_sign_deficit():
-    """Neither impossibility rules this family out, so it is measured rather than argued.
+    """Section 9.2b's third row: a single-channel read carries no indicator of the sign.
 
-    Along a flux sweep the sign deficit rises and falls and the single-channel spectral reads do
-    not follow. Asserted as an ABSENCE of rank correlation, which is the claim; a test that only
-    checked a couple of points could pass on a monotone stretch.
+    Along a flux sweep the sign deficit rises and falls, and no single-channel spectral read
+    follows it as well as the deficit follows itself across seeds. Asserted as a rank correlation
+    below the deficit's own reproducibility, which is the claim and is the comparison the paper
+    makes; a test that checked a couple of points could pass on a monotone stretch.
+
+    `reads/expBG_single_channel_has_no_indicator.py` is the same question over a full flux period
+    and across six lattices, and is where section 9.2b's figures come from.
     """
     from scipy.linalg import expm
     from scipy.stats import spearmanr
@@ -90,7 +94,7 @@ def test_a_single_channel_read_does_not_track_the_sign_deficit():
                 if sg == +1:
                     g = np.diag(inv_one_plus_block(Uu, D, T)[0]).copy()
             A.append(g); W.append(d_[+1] * d_[-1])
-        so = E.reads.spectral_optics(np.array(A))
+        so = EA.single_channel_optics(np.array(A))
         # circular distance from pi -- a plain |phase - pi| wraps and reads 6.2 for 0.04
         gap = abs(np.angle(np.exp(1j * (float(so.phase) - np.pi))))
         return 1.0 - float(abs(np.asarray(W).mean())), gap, float(so.attenuation)

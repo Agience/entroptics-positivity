@@ -1,4 +1,4 @@
-"""§5's balance read, gated: the separation belongs to the system's own zero.
+"""§7's balance read, gated: the separation belongs to the system's own zero.
 
 Three assertions, and the second is the one that makes the first mean anything:
 
@@ -7,7 +7,7 @@ Three assertions, and the second is the one that makes the first mean anything:
   * with the library's DEFAULT zero the read is blind, median 1.00000 on every row. Without this
     the separation could belong to the read rather than to the law it was given;
   * the phase rows are asserted to be MISSED, so a later draft cannot claim this sees a phase
-    problem. It does not, and §5 says why.
+    problem. It does not, and §7 says why.
 
 The pvalue is the quantity, not the boolean `closed`, which is a per-run decision and fluctuates.
 """
@@ -93,7 +93,7 @@ def test_a_phase_problem_is_missed_and_is_known_to_be(name, K):
     caught = max(median_p(P, True) for P in SIGN_PROBLEM)
     assert median_p(K, True) > caught, \
         f"{name}: this row now flags -- it scores {median_p(K, True):.5f} against the caught " \
-        f"population's {caught:.5f}; re-examine §5's scope paragraph"
+        f"population's {caught:.5f}; re-examine §7's scope paragraph"
 
 
 def test_the_read_is_not_a_per_column_deviation_test():

@@ -18,7 +18,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
@@ -48,7 +48,7 @@ def read_lattice(Lx, Ly, beta, U=4.0, dtau=0.125, n_draw=200, seed=0):
     su, sd = np.array(su), np.array(sd)
     return dict(res=np.array(res), flip=float(np.mean(su < 0)),
                 agree=float(np.mean(su == sd)), neg=float(np.mean(su * sd < 0)),
-                coupling=E.reads.coupling(np.array(A), np.array(B)))
+                coupling=EA.channel_alignment(np.array(A), np.array(B)))
 
 
 @pytest.mark.parametrize("Lx,Ly", BIPARTITE)

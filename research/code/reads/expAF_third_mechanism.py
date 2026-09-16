@@ -6,7 +6,7 @@ Sections 2 to 5 read two sign-free situations, and BOTH of them relate the two c
     attractive, charge channel, any filling   G_dn =     G_up      -> the read gives +1
 
 If the read only saturates on an affine relation then "it measures synchronisation" is too broad a
-description of it, and section 5 is overstated.  So the test is a mechanism where positivity comes
+description of it, and section 7 is overstated.  So the test is a mechanism where positivity comes
 from somewhere else entirely.
 
 WU-ZHANG / KRAMERS POSITIVITY.  Take a spin-dependent flux: the hopping carries a phase
@@ -46,7 +46,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import expm
 
-import entroptics as E
+import entroptics_adapter as EA
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
 
@@ -105,10 +105,10 @@ def run(Lx, Ly, beta, U, mu, phi, time_reversal, dtau=0.125, n_draw=200, seed=0)
 
     A, B = np.array(A), np.array(B)
     wre, wim = np.array(wre), np.array(wim)
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     # the same read on the REAL parts alone, where the two channels are identical by conjugation
-    cr = E.reads.coupling(A[:, :N], B[:, :N])
-    ci = E.reads.coupling(A[:, N:], B[:, N:])
+    cr = EA.channel_alignment(A[:, :N], B[:, :N])
+    ci = EA.channel_alignment(A[:, N:], B[:, N:])
     return dict(conj=float(np.max(conj_err)), imag=float(np.abs(A[:, N:]).max()),
                 phase=float(np.max(np.abs(wim) / (np.abs(wre) + 1e-300))),
                 neg=float(np.mean(wre < 0)),

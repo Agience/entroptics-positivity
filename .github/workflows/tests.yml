@@ -1,0 +1,73 @@
+# The gates, on every push and pull request.
+#
+# In this rig a defect does not look like a crash, it looks like a result -- an unstabilised
+# determinant product reports a severe sign problem that is not there, a blind comparison passes a
+# test that never asked it anything. So every gate carries a negative control, and the controls only
+# protect the paper if something runs them.
+#
+# Everything here computes: the sampler is gated against brute-force enumeration of every auxiliary
+# field, and the reads run on configurations generated from a seed. There is no data release to
+# attach and nothing is skipped for want of one, which is why this workflow can check the whole
+# suite rather than a filesystem-facts subset of it.
+
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  suite:
+    name: the gates, with their negative controls
+    runs-on: ubuntu-latest
+    # CHOSEN: a wall-clock cap. The suite is about fourteen minutes on a 22-core box and longer on a
+    # two-core runner; this bounds a wedged run and nothing else.
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install the pinned reader
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r research/requirements.txt
+
+      # The version the paper's numbers were read through is stated in research/requirements.txt and
+      # enforced at import by the adapter. Printing it here means a run that installed something else
+      # says so in its own log rather than in a later failure.
+      - name: Say which reader is loaded
+        working-directory: research/code
+        run: |
+          PYTHONPATH=. python -c "import entroptics_adapter as A; print(f'entroptics pinned {A.REQUIRED_VERSION}, loaded {A.INSTALLED_VERSION}')"
+
+      - name: Run the suite
+        working-directory: research/code
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -q -rs
+
+      # A run where nothing ran is a green tick over nothing, and it looks exactly like a run where
+      # everything passed. The floor is well under the number that currently collect, so it catches a
+      # collapse -- a broken import, a conftest that errors, a rename that silently deselects -- without
+      # breaking on ordinary additions.
+      - name: Refuse a vacuously green run
+        working-directory: research/code
+        env:
+          PYTHONPATH: .
+        run: |
+          collected=$(python -m pytest --collect-only -q 2>/dev/null | tail -1 | grep -oE '^[0-9]+' || echo 0)
+          echo "tests collected: $collected"
+          if [ "${collected:-0}" -lt 400 ]; then
+            echo "::error::only $collected tests collected; expected at least 400."
+            exit 1
+          fi

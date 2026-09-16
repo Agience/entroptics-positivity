@@ -60,7 +60,7 @@ def test_the_read_spans_the_full_range_while_the_physics_holds_still():
 
 @pytest.mark.parametrize("mu", [0.4, 0.8])
 def test_doping_the_family_produces_genuinely_complex_weights(mu):
-    """The complex-weight case the parity argument of §7 does not reach.
+    """The complex-weight case the parity argument of §8 does not reach.
 
     This test asserted `imagshare > 1.0` while `imagshare` was `|Im w| / |Re w|` -- a ratio that
     can exceed 1 only because it is unbounded, which is the defect that statistic has.  It now
@@ -84,7 +84,7 @@ def test_doping_the_family_produces_genuinely_complex_weights(mu):
 
 @pytest.mark.parametrize("mu", [0.4, 0.8])
 def test_the_read_saturates_on_the_worst_complex_row(mu):
-    """AND THE READ DOES NOT REACH THEM EITHER -- the collision of §5, at theta = 1."""
+    """AND THE READ DOES NOT REACH THEM EITHER -- the collision of §7, at theta = 1."""
     for seed in SEEDS:
         r = sweep(1.0, 4.0, mu, seed)
         # 'The worst complex row' against the two poles this quantity has: the sign-free control,
@@ -172,10 +172,10 @@ def test_the_lockstep_is_absent_in_the_interior_of_the_family():
         f"the interior was not at chance: {[round(r['lock'], 4) for r in mid]}"
 
 
-# ── §8.3: the scalar decoupling family, and which member wins ───────────────
+# ── §9.3: the scalar decoupling family, and which member wins ───────────────
 
 def test_both_rewritings_of_the_interaction_are_exact_at_every_mixing():
-    """The algebra §8.3 rests on, checked by quadrature before any lattice."""
+    """The algebra §9.3 rests on, checked by quadrature before any lattice."""
     from model2d import single_site_identity
     for theta in (0.0, 0.25, 0.5, 0.75, 1.0):
         worst = max(abs(q - e) / abs(e) for _, _, e, q in single_site_identity(4.0, 0.2, theta))
@@ -183,7 +183,7 @@ def test_both_rewritings_of_the_interaction_are_exact_at_every_mixing():
 
 
 def test_the_spin_channel_wins_monotonically_with_no_interior_optimum():
-    """§8.3's sweep: the family is one parameter wide and its best member is an endpoint.
+    """§9.3's sweep: the family is one parameter wide and its best member is an endpoint.
 
     Asserted as an ORDERING across theta rather than on any single value, and over seeds, because
     the negative fraction is an estimate. An interior optimum would show as a violation of the

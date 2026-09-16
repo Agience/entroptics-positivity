@@ -1,6 +1,6 @@
-"""The criterion behind §4, gated: a signed-diagonal conjugation of the one-body matrix.
+"""The criterion behind §5, gated: a signed-diagonal conjugation of the one-body matrix.
 
-The §3 identity holds exactly when `S K S = -K` for some diagonal S of +-1 -- elementwise
+The §4 identity holds exactly when `S K S = -K` for some diagonal S of +-1 -- elementwise
 `s_i s_j K_ij = -K_ij`, which is a 2-colouring of K's support graph plus a zero diagonal.  It is
 decided from K alone: no eigenvalues, no determinants, no sampling.
 
@@ -19,7 +19,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import entroptics as E
+import entroptics_adapter as EA
 from scipy.linalg import expm
 
 from stable import udt_product, inv_one_plus_block
@@ -71,7 +71,7 @@ def test_the_criterion_predicts_on_a_lattice_with_no_designed_symmetry(strength)
 
 
 def test_a_staggered_potential_breaks_it_while_the_lattice_stays_bipartite():
-    """The case §4's stated conditions do not cover: a diagonal term cannot be negated by signs."""
+    """The case §5's stated conditions do not cover: a diagonal term cannot be negated by signs."""
     K = build(2, 4, 0.0, 0.0, 0.6)
     assert signed_diagonal_conjugation(K) is None
     ok, r = holds(K)
@@ -223,17 +223,16 @@ def test_flux_restores_the_identity_and_makes_the_sign_worse():
     """THE CORRECTION. Route B restores the identity on an odd cycle and leaves a PHASE behind.
 
     The second return of `measure` is `1 - |<w/|w|>|`: the ordinary negative-weight measure when
-    the weight is real, and the mean-phase deficit when it is not. An earlier version tested
-    `real(s_up) * real(s_dn) < 0`, which is meaningless for a complex determinant -- `slogdet`
-    returns a unit-modulus phase there -- and reported 0.0000 on a lattice whose weights are 93%
-    phase-carrying. This test exists so that cannot come back.
+    the weight is real, and the mean-phase deficit when it is not. It has to be read that way for a
+    complex determinant, where `slogdet` returns a unit-modulus phase and `real(s_up) * real(s_dn)
+    < 0` reports 0.0000 on a lattice whose weights are 93% phase-carrying.
     """
     bad, dbad = measure(tri_ladder(8, 0.0), 8.0, n_draw=200, seed=9)
     good, dgood = measure(tri_ladder(8, np.pi / 2), 8.0, n_draw=200, seed=9)
     assert bad > 1.0, "the unfluxed ladder's identity should be broken"
     assert good < 1e-9, "flux should restore the identity"
-    # The claim is a direction, and it is asserted as one. A factor -- `3x` stood here -- would be
-    # a number fitted to the pair it is measured on (0.060 -> 0.522 at this beta and seed).
+    # The claim is a direction and is asserted as one: a factor here would be a number fitted to
+    # the single pair it is measured on, at this beta and seed.
     assert dgood > dbad, \
         f"the flux did not make the sign quality worse: {dbad:.4f} -> {dgood:.4f}"
 
@@ -312,7 +311,7 @@ def test_no_flux_rescues_a_doped_graph(name, fn):
     assert best > 1.0, f"{name}: the identity nearly held at mu = 0.2 ({best:.3e})"
 
 
-# ── the two routes are not interchangeable for the §5 calibration ───────────
+# ── the two routes are not interchangeable for the §7 calibration ───────────
 
 def _channels(K, beta=8.0, U=4.0, dtau=0.125, n=200, seed=5):
     """The two channels' Green's diagonals, complex where K is."""
@@ -344,7 +343,7 @@ def test_route_B_gives_the_exact_particle_hole_relation_and_the_exact_minus_one(
     assert route_B(Kc) and not route_A(Kc), f"{name} is not route-B-only"
     A, B = _channels(Kc)
     assert float(np.abs(A + B - 1.0).max()) < 1e-9, f"{name}: particle-hole relation broken"
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     assert c.resolved and c.strength == pytest.approx(-1.0, abs=1e-4)
 
 
@@ -355,7 +354,7 @@ def test_route_B_gives_the_exact_particle_hole_relation_and_the_exact_minus_one(
 def test_route_A_alone_is_sign_free_without_the_calibration(name, K):
     """THE SEPARATION. The identity holds and the read is NOT -1.
 
-    Positivity, the §3 identity and the exact -1 coincide everywhere in §§2-4 and come apart
+    Positivity, the §4 identity and the exact -1 coincide everywhere in §§3-4 and come apart
     here, which is why the calibration is attributed to route B and not to the identity.
     """
     Kc = np.asarray(K, dtype=complex)
@@ -365,7 +364,7 @@ def test_route_A_alone_is_sign_free_without_the_calibration(name, K):
     assert neg == 0.0, f"{name}: should still be sign-free, got {neg}"
     A, B = _channels(Kc)
     assert float(np.abs(A + B - 1.0).max()) > 1e-3,         f"{name}: the particle-hole relation held, so nothing separates the routes here"
-    c = E.reads.coupling(A, B)
+    c = EA.channel_alignment(A, B)
     assert abs(c.strength + 1.0) > 1e-3, f"{name}: the read saturated at {c.strength:.4f}"
 
 
@@ -400,4 +399,4 @@ def test_the_route_A_reading_is_derived_not_merely_observed(N, flux_over_pi):
     Ac = A - A.mean(axis=0, keepdims=True)
     vre = float((Ac.real ** 2).sum()); vim = float((Ac.imag ** 2).sum())
     r = vim / (vre + vim)
-    assert E.reads.coupling(A, B).strength == pytest.approx(-1.0 + 2.0 * r, abs=1e-10)
+    assert EA.channel_alignment(A, B).strength == pytest.approx(-1.0 + 2.0 * r, abs=1e-10)

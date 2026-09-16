@@ -1,4 +1,4 @@
-"""§5's capability table, gated on the rows that carry the claim.
+"""§7's capability table, gated on the rows that carry the claim.
 
 The claim is that the deficit moves, and is resolved, where `<sgn>` is identically 1 -- so the rows
 gated here are the SHALLOW ones, where the average sign has no derivative to read.  Those are also

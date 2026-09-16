@@ -123,7 +123,7 @@ if __name__ == "__main__":
     # 1.000 with `picks the best? YES`.  That is arithmetic, not a working selection criterion, and
     # it says nothing about whether minimising the CPMC energy would choose well in general (the
     # constrained path is not variational, so a negative bias breaks it).  The row is flagged in
-    # the output so it cannot be quoted as a criterion that works.  The claim S8.6 makes is about
+    # the output so it cannot be quoted as a criterion that works.  The claim section 9.6 makes is about
     # the NOCI bound, which is answer-free and anti-correlated.
     print(f"{'criterion':>14} {'Spearman vs |bias|':>19} {'p':>8} {'picks the best?':>16}")
     best = int(np.argmin(b))

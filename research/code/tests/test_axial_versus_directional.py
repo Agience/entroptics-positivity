@@ -1,4 +1,4 @@
-"""§5's two-mode diagnosis, gated: which failure mode, and whether a rotation removes it.
+"""§7's two-mode diagnosis, gated: which failure mode, and whether a rotation removes it.
 
 `concentration` reports a directional statistic and an axial one. On the weight's unit-modulus
 frame `resultant` IS `|<w/|w|>|` by construction -- arithmetic, asserted here as such so it is never

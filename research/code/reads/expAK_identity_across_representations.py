@@ -1,4 +1,4 @@
-"""Experiment AK -- does the section 3 identity survive a change of representation?
+"""Experiment AK -- does the section 4 identity survive a change of representation?
 
 The identity
 
@@ -10,7 +10,7 @@ the decoupling: the two spins' diagonal factors are INVERSES, `V_up = V_dn^-1`. 
 Gaussian spin decoupling has that property too, with its own constant `lambda_s = sqrt(dtau U)`.
 
 So the identity should hold there as well, with a DIFFERENT coefficient supplied by the same
-derivation.  That is a real prediction and it comes with a control sharper than any in section 3.
+derivation.  That is a real prediction and it comes with a control sharper than any in section 4.
 At `U = 4, dtau = 0.125`:
 
     discrete   lambda = arccosh(exp(dtau U / 2)) = 0.73692
@@ -21,14 +21,14 @@ the other -- which no amount of "a relation of roughly this form holds" can prod
 neither coefficient can be fitted to, both being closed forms of the decoupling.
 
 If instead the continuous representation needed the discrete constant, or needed neither, the
-identity would be a property of the Ising field rather than of the structure, and section 3 would
+identity would be a property of the Ising field rather than of the structure, and section 4 would
 be describing a coincidence of one representation.
 """
 from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 from model2d import Model2D
 from stable import udt_product, inv_one_plus_block, slogdet_one_plus_block
 
@@ -87,7 +87,7 @@ def lockstep(field, beta, U=4.0, dtau=0.125, Lx=2, Ly=4, n=200, seed=0):
             s[sigma] = float(np.real(sg[0]))
         su.append(s[+1]); sd.append(s[-1]); A.append(g[+1]); B.append(g[-1])
     su, sd = np.array(su), np.array(sd)
-    c = E.reads.coupling(np.array(A), np.array(B))
+    c = EA.channel_alignment(np.array(A), np.array(B))
     return dict(flip=float(np.mean(su < 0)), agree=float(np.mean(su == sd)),
                 neg=float(np.mean(su * sd < 0)), s=float(c.strength), z=float(c.z))
 

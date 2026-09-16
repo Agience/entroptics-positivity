@@ -1,6 +1,6 @@
 """Experiment AP -- a magnitude read cannot see a sign, for any exponent.
 
-Section 5 reads a COUPLING between two channels rather than a magnitude of either. This file is
+Section 7 reads a COUPLING between two channels rather than a magnitude of either. This file is
 why: every read that depends on the data only through its magnitudes is blind to the sign, and the
 blindness is exact rather than a matter of resolution.
 
@@ -15,7 +15,7 @@ values are invariant under an orthogonal factor.
 
 So the frames are identical to a magnitude read and maximally different in sign -- and the sign of
 the determinantal weight is exactly what a sign problem is made of. Only a read that compares two
-sides can see it, which is what section 5 uses.
+sides can see it, which is what section 7 uses.
 
 The test carries its own positive control: the coupling BETWEEN the two frames does see the flip,
 so the blindness demonstrated is a property of magnitude reads and not of the frames being
@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import entroptics as E
+import entroptics_adapter as EA
 
 
 def flipped(A, sigma):
@@ -79,8 +79,8 @@ if __name__ == "__main__":
     print("THE POSITIVE CONTROL.  A read that compares two sides DOES see the flip, so the")
     print("blindness above is a property of magnitude reads and not of these frames:")
     for name, X in frames.items():
-        c = E.reads.coupling(A, X)
+        c = EA.channel_alignment(A, X)
         print(f"  coupling(A, {name:>28}) = {c.strength:+.4f}   z = {c.z:8.1f}", flush=True)
     print()
-    print("That is why section 5 reads a coupling between the two channels and not a magnitude")
+    print("That is why section 7 reads a coupling between the two channels and not a magnitude")
     print("of either: the sign of a determinantal weight lives in the relation, not in the sizes.")

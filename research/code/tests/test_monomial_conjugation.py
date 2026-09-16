@@ -1,4 +1,4 @@
-"""§4's diagonal restriction is necessary, gated -- with the counterexample pinned.
+"""§5's diagonal restriction is necessary, gated -- with the counterexample pinned.
 
 The claim this file protects is a TIGHTNESS claim, and tightness claims rot quietly: someone
 widens the conjugation class for a good reason, the criterion still passes every lattice anyone
@@ -6,13 +6,13 @@ checks, and the two staggered rows that break it are never run. So the counterex
 directly rather than left in a table.
 
   * `S K S^dag = -K` is verified EXACTLY on the staggered lattice under a monomial S;
-  * the §3 identity is measured there and must FAIL;
+  * the §4 identity is measured there and must FAIL;
   * the diagonal criterion must score 14 of 14 against the measured identity and the monomial one
     must score strictly worse.
 
 The last of those is the load-bearing assertion. A test asserting only "diagonal is 14 of 14" would
 pass on a build where monomial was also 14 of 14, which is the world in which the restriction is
-unnecessary and §4 overclaims.
+unnecessary and §5 overclaims.
 """
 from __future__ import annotations
 
@@ -83,7 +83,7 @@ def test_the_diagonal_criterion_beats_the_monomial_one_against_the_measured_iden
         f"the diagonal criterion no longer predicts the identity on every row: {diag}/{len(rows)}"
     assert mono < diag, \
         f"widening the class to monomial no longer costs anything ({mono} against {diag}); " \
-        f"if that is real, section 4's restriction is not necessary and the claim must change"
+        f"if that is real, section 5's restriction is not necessary and the claim must change"
 
 
 def test_route_b_lattices_carry_a_phase_no_rotation_removes():

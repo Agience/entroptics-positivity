@@ -1,6 +1,6 @@
-"""§4's CONTROL, gated: bipartite structure versus filling, compared at the SAME filling.
+"""§5's CONTROL, gated: bipartite structure versus filling, compared at the SAME filling.
 
-This is the control rather than the result, and it is the one that decides whether §4 says anything
+This is the control rather than the result, and it is the one that decides whether §5 says anything
 at all.  Varying `tp` destroys the bipartite structure, and it also moves the band, so `mu = 0`
 stops being half filling: `tp = 0` sits at `<n> = 1.00000` and `tp = 0.7` at `<n> = 0.75`.  Compared
 without matching the filling, the same data reads as "breaking the bipartite structure REMOVES the

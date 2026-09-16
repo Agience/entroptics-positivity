@@ -1,11 +1,11 @@
-"""Experiment AO -- the algebraic criterion behind section 4's conditions.
+"""Experiment AO -- the algebraic criterion behind section 5's conditions.
 
-RESULT.  The identity of section 3 holds exactly when the one-body matrix K admits a SIGNED
+RESULT.  The identity of section 4 holds exactly when the one-body matrix K admits a SIGNED
 DIAGONAL conjugation `S K S = -K` with `S = diag(+-1)`.  Elementwise that reads
 `s_i s_j K_ij = -K_ij`, so it is a 2-colouring of K's support graph together with a zero diagonal:
 O(N^2), no eigenvalues, no determinants, no sampling.
 
-It unifies section 4's separate conditions and adds a case they do not cover -- `tp` puts an odd
+It unifies section 5's separate conditions and adds a case they do not cover -- `tp` puts an odd
 cycle in the graph, `mu` puts a term on the diagonal, and so does a staggered potential, which
 leaves the lattice bipartite and the filling at exactly one per site and breaks the identity
 regardless.
@@ -43,14 +43,14 @@ does and a general unitary does not.
 
 ---
 
-Original question: is there one algebraic criterion behind section 4's two conditions?
+Original question: is there one algebraic criterion behind section 5's two conditions?
 
-Section 4 establishes empirically that the identity needs a bipartite lattice AND half filling.
+Section 5 establishes empirically that the identity needs a bipartite lattice AND half filling.
 The derivation suggests those are two faces of one requirement.  The identity comes from
 
     det(I + B) = det(B) det(I + B^-1)
 
-and reduces to the section 3 form only if `det(I + B_up^-1) = det(I + B_dn)`.  Writing out the
+and reduces to the section 4 form only if `det(I + B_up^-1) = det(I + B_dn)`.  Writing out the
 slice matrices, `B_up^-1` carries `expmK^-1` where `B_dn` carries `expmK`, so what is needed is
 
     K  similar to  -K
@@ -58,14 +58,14 @@ slice matrices, `B_up^-1` carries `expmK^-1` where `B_dn` carries `expmK`, so wh
 which for a Hermitian K is the statement that its SPECTRUM IS SYMMETRIC ABOUT ZERO.
 
 That is checkable in O(N^3) from the one-body matrix alone, with no sampling, no determinant and no
-field.  If it is the criterion, then three different-looking ways of breaking section 4's
+field.  If it is the criterion, then three different-looking ways of breaking section 5's
 conditions should all break it, and should break it in proportion:
 
   * next-nearest hopping `tp`  -- destroys the sublattice structure that made K ~ -K;
   * a chemical potential `mu`  -- puts -mu on the diagonal, shifting the whole spectrum;
   * a STAGGERED potential `h`  -- new here, and the interesting one, because it leaves the lattice
     bipartite AND leaves the filling at exactly one per site by the residual symmetry, so it
-    breaks neither of section 4's stated conditions.  Under the sublattice map a hopping term goes
+    breaks neither of section 5's stated conditions.  Under the sublattice map a hopping term goes
     to minus itself while a diagonal term does not, so `K + D` is not similar to `-(K + D)`.
 
 If the staggered rows break the identity, "bipartite at half filling" is a sufficient condition
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     print()
     print("THE SIGNED-DIAGONAL CRITERION IS.  `S K S = -K` for diagonal S of +-1 is a 2-colouring")
     print("of K's support graph plus a zero diagonal.  It is O(N^2), needs no eigenvalues and no")
-    print("sampling, and it unifies all three of section 4's separate conditions: tp adds an odd")
+    print("sampling, and it unifies all three of section 5's separate conditions: tp adds an odd")
     print("cycle, mu puts -mu on the diagonal, and a staggered potential does too.")
 
 

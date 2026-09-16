@@ -11,7 +11,7 @@ the whole content here:
 
 A REAL sign problem is an antipodal cloud: the weights sit at +-1, on one line through the origin.
 A PHASE problem is spread around the circle.  So the pair separates the two failure modes, which
-matter differently -- section 4's criterion speaks to the first, and its route B produces the
+matter differently -- section 5's criterion speaks to the first, and its route B produces the
 second.
 
 WHAT `focus = 1` ACTUALLY CERTIFIES.  Rank one in the (Re, Im) plane means every weight lies on a
@@ -30,7 +30,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import expm
 
-import entroptics as E
+import entroptics_adapter as EA
 from stable import udt_product, slogdet_one_plus_block
 
 
@@ -56,7 +56,7 @@ def unit_weights(Kmat, seed=5, beta=8.0, U=4.0, dtau=0.125, n=400):
 
 def axial_and_directional(u):
     """(resultant, focus) of the weight cloud, read on the (Re, Im) plane."""
-    c = E.reads.concentration(np.stack([u.real, u.imag], axis=1))
+    c = EA.weight_cloud(np.stack([u.real, u.imag], axis=1))
     return float(c.resultant), float(c.focus)
 
 
