@@ -100,7 +100,7 @@ if __name__ == "__main__":
     print("SECTION 4'S CRITERION, PERFORMED BY A READ ON OUTPUT")
     print()
     print("`coupling` sees two columns per configuration and never sees K.  The algebraic")
-    print("criterion sees K and never sees a configuration.  They share no information.")
+    print("criterion sees K and never sees a configuration.  Neither gets the other's input.")
     print()
     print(f"{'lattice':>24} | {'1 - |strength|':>15} {'z':>9} {'res':>5} | {'null |s|':>9} "
           f"{'null res':>8} | {'from K':>7} {'identity':>11} | {'agree':>6}")

@@ -122,9 +122,10 @@ def channel_alignment(a, b, **kw):
         .resolved   whether there was an alignment to report at all.
 
     The deficit `1 + strength` is what section 7 calls the distance from the protecting symmetry.
-    It is an onset detector rather than a severity meter, and section 9 gives the reason: the
-    deficit is confined to [0, 2] while `-ln<sgn>` is unbounded, so no fixed map between them
-    exists (`Alignment.deficit_mem_Icc`).
+    It is an onset detector rather than a severity meter, and section 8 gives the reason: the
+    severity is set by the parity of a crossing count, and the deficit is a summary that has
+    already discarded that count. The deficit's own range is `[0, 2]`
+    (`Alignment.deficit_mem_Icc`).
 
     THE SIGN DOES NOT ENTER THIS READ. Callers hand it the two channels' frames; the sign of the
     weight is collected alongside and is never an argument. So this is an unweighted statistic of

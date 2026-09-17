@@ -1,7 +1,7 @@
 /-
-Section 7 -- the sign is a PARITY, and what that does and does not rule out.
+Section 8 -- the sign is a PARITY, and what that does and does not rule out.
 
-§7 tests three per-configuration candidates for predicting the sign, finds all three fail, and gives
+§8 tests three per-configuration candidates for predicting the sign, finds all three fail, and gives
 a structural reason:
 
     det(I + B) = prod_k (1 + lambda_k)
@@ -9,20 +9,18 @@ a structural reason:
 so the sign is the parity of the number of eigenvalues past the crossing. That much is exact and is
 `prod_pos_iff_even_neg` below.
 
-WHAT THE PARITY ARGUMENT ACTUALLY RULES OUT, which is narrower than §7's prose claimed. The section
-said "no continuous summary of a spectrum determines it" and then, in the next sentence, "the
-determinant itself is of course a scalar that settles the parity exactly" -- and the determinant is
-continuous. Both cannot stand. Formalising forces the distinction:
+WHAT THE PARITY ARGUMENT RULES OUT is narrower than it first appears, and drawing the line is what
+this file is for:
 
   * a continuous function can DETERMINE the sign. The product does, and `det_determines_sign` says
     so. Continuity is therefore not the obstruction, and an argument resting on it proves nothing.
   * a continuous function cannot BE the sign. `sign` jumps at a crossing, and no continuous function
     equals a function that jumps -- `no_continuous_function_is_the_sign`.
 
-So the correct reading of §7 is the second: the cheap observables fail not because they are
+So the obstruction is coarseness: the cheap observables fail not because they are
 continuous but because each is a COARSE summary that has already discarded the crossing count, and
 the one continuous scalar that keeps it is the determinant, whose cost the question was asked to
-avoid. The measurement in §7 is what establishes that the three specific candidates discard it; this
+avoid. The measurement in §8 is what establishes that the three specific candidates discard it; this
 file establishes what shape of argument is available at all.
 -/
 import Mathlib.Tactic
@@ -37,7 +35,7 @@ variable {ι : Type*} [DecidableEq ι]
 
 /-- **The sign of a product is the parity of its negative factors.**
 
-    `det(I + B) = prod_k (1 + lambda_k)`, so this is §7's structural fact: whether the weight is
+    `det(I + B) = prod_k (1 + lambda_k)`, so this is §8's structural fact: whether the weight is
     positive is settled by whether an EVEN number of eigenvalues have gone past the crossing. It is
     a count, and a count modulo two -- which is why no amount of knowing *how far* the eigenvalues
     have moved settles it. -/
@@ -95,9 +93,9 @@ theorem prod_neg_iff_odd_neg (s : Finset ι) (f : ι → ℝ) (hf : ∀ i ∈ s,
 
 /-- **A continuous scalar CAN determine the sign**, and the determinant is one.
 
-    Stated because §7's prose claimed the opposite in passing. Continuity is not the obstruction:
-    the product is continuous in the eigenvalues and settles the parity exactly. What makes it
-    useless for the question §7 asks is its cost, not its regularity. -/
+    Continuity is not the obstruction: the product is continuous in the eigenvalues and settles
+    the parity exactly. What makes it useless for the question §8 asks is its cost, not its
+    regularity. -/
 theorem det_determines_sign (s : Finset ι) (f g : ι → ℝ)
     (hf : ∀ i ∈ s, f i ≠ 0) (hg : ∀ i ∈ s, g i ≠ 0)
     (h : ∏ i ∈ s, f i = ∏ i ∈ s, g i) :
@@ -124,7 +122,7 @@ theorem sign_not_continuousAt_zero : ¬ ContinuousAt Real.sign 0 := by
     This is what the parity argument rules out, stated at the strength it actually has: a summary
     that equals the sign has to jump where the sign jumps, and a continuous one cannot. It does not
     rule out a continuous function that determines the sign without equalling it -- see
-    `det_determines_sign` -- which is why §7's evidence against the three candidates is the
+    `det_determines_sign` -- which is why §8's evidence against the three candidates is the
     MEASUREMENT that each discards the crossing count, not their continuity. -/
 theorem no_continuous_function_is_the_sign (g : ℝ → ℝ) (hg : Continuous g) :
     ¬ (∀ x, g x = Real.sign x) := by

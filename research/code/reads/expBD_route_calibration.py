@@ -11,7 +11,8 @@ So the numbers were reproducible in the sense that a gate holds them, and not re
 sense the paper's own measurement note requires: nothing printed them.  This does.
 
 WHAT IT SHOWS.  Section 5 gives two routes to the identity.  Route A is `S K S^-1 = -K`; route B
-is `S K S^-1 = -conj(K)`.  Both give positivity and both give the section-3 identity.  Only route B
+is `S K S^-1 = -conj(K)`.  Both give the section-4 identity; only route A leaves the weights real.
+Only route B
 forces the particle-hole relation `G_dn = 1 - G_up` configuration by configuration, and only route
 B therefore calibrates the coupling to exactly `-1`.
 
@@ -80,7 +81,8 @@ if __name__ == "__main__":
     print("=" * 104)
     print(f"THE CALIBRATION COMES FROM ROUTE B, NOT FROM THE IDENTITY."
           f"   U = {U}, beta = {BETA}, {N_DRAW} configurations per row")
-    print("Both routes give positivity and the section-3 identity.  Only route B forces")
+    print("Both routes give the section-4 identity; only route A leaves the weights real.")
+    print("Only route B forces")
     print("G_dn = 1 - G_up configuration by configuration, and only route B calibrates the read.")
     print("=" * 104)
     print(f"{'K':<28}{'route A':>9}{'route B':>9}{'max|G_up+G_dn-1|':>20}"

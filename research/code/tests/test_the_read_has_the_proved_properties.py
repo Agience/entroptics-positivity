@@ -97,8 +97,8 @@ def test_a_negative_scale_flips_the_sign_and_not_the_magnitude():
 def test_the_read_is_bounded_and_so_is_the_deficit(seed):
     """`Alignment.abs_strength_le_one` and `Alignment.deficit_mem_Icc`.
 
-    Section 7's onset-not-severity limit rests on the deficit being confined to `[0, 2]` while
-    `-ln<sgn>` is unbounded above. The bound needs no hypothesis in Lean and none here.
+    The `[0, 2]` range is what section 7.2 quotes for the deficit. It needs no hypothesis in
+    Lean and none here.
     """
     a, b = _columns(seed)
     s = _strength(a, b)

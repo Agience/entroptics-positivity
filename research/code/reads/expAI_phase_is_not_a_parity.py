@@ -1,9 +1,9 @@
 """Experiment AI -- a phase is not a parity, and the same physics can have either.
 
-Section 8 argues that no continuous summary determines the sign, because the sign is a PARITY and
-a parity is not a continuous function of anything.  The boundary found in section 7 raises the
-other case: when the weight is complex the sign problem is a PHASE, which is continuous, so that
-argument does not reach it and section 8 is incomplete as written.
+Section 8's argument is about REAL weights: the sign is a parity of a crossing count, and the cheap
+per-configuration candidates miss it because each is a summary that has already discarded that
+count.  A PHASE carries no parity, so the argument does not reach the complex case at all.  That is
+the case this sweep measures.
 
 The cleanest instrument for this is already in the model.  Both of these are exact identities on
 the four states of a site,

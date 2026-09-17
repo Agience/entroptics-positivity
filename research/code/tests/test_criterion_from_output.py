@@ -1,6 +1,6 @@
 """§5's criterion performed by a read on OUTPUT, gated against the algebraic criterion.
 
-The two sides share no information. `coupling` sees two columns per configuration and never sees
+Neither side is given the other's input. `coupling` sees two columns per configuration and never sees
 `K`; the algebraic criterion sees `K` and never sees a configuration. Agreement between them is the
 result, and it is what makes the criterion usable by a running simulation, which has configurations
 and determinants and does not have a clean Hamiltonian to two-colour.

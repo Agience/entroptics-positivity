@@ -17,8 +17,8 @@ problem, or a phase problem no rotation reaches. **The sign problem is the rank-
 problem**: rank one in the plane means the phase takes two values `pi` apart, and a phase confined
 to `Z2` is what a sign *is*.
 
-The reading is scored against an independent oracle computed from the Hamiltonian, and the two
-sides share no information — the oracle sees `K` and never a configuration, the read sees two
+The reading is scored against an independent oracle computed from the Hamiltonian, and neither side
+is given the other's input — the oracle sees `K` and never a configuration, the read sees two
 logged columns and never `K`. They agree on **15 of 15 lattices**. The physics underneath is the
 lockstep: a configuration's weight is a product of two determinants, one per spin channel, and at
 half filling they cross the sign boundary together — on around 11% of configurations at
@@ -73,8 +73,9 @@ its own exact re-pairing null with no constant supplied, returns
 * **exactly `-1.0000`** where the lockstep is perfect — recovering the particle-hole identity
   `G_up[i,i](x) + G_dn[i,i](x) = 1`, which holds configuration by configuration at a maximum
   residual of **4.9e-15** at `beta = 2`, rising to `1.2e-12` at `beta = 8`;
-* a continuous departure from `-1` as the lockstep breaks, at **|z| = 137** against a permuted
-  control at `|z| <= 1.7`;
+* a continuous departure from `-1` as the lockstep breaks — **`0.03574 ± 0.00022`** across four
+  seeds, growing `5.6x` by `beta = 6`, with a permuted control that stays unresolved at
+  `|z| <= 1.7`;
 * and it does so **while the average sign is still identically 1.00000 +- 0.00000**.
 
 **What the deficit measures, exactly.** The read is a normalised alignment, so its deficit is an
@@ -82,17 +83,18 @@ angle: `1 - cos∠` between the two centred channel frames. Rescaling one channe
 instead of `1 - A` — leaves the deficit at **exactly zero** while the raw violation grows to the
 size of the channel itself. Only the component of the particle-hole violation *perpendicular* to
 the channel registers, and to leading order the deficit is `|E_perp|² / (2|A||B|)`. So the order
-parameter tracks an angle, which is bounded — and `-ln<sgn>` is not. That is why it detects onset
-and not severity.
+parameter tracks an angle, and the angle moves as soon as the violation appears — before `<sgn>`
+has left 1. That is why it detects onset and not severity.
 
 That last point is the capability. The average sign is an average of a binary: where the channels
 are locked it is a constant, and a constant has no derivative. The coupling reads the alignment
 that produces the lock, so it moves first.
 
 Its scope is bounded and the boundary is provable: `strength` lies in `[-1, 1]`, so the departure
-lies in `[0, 2]`, while `-ln<sgn>` is unbounded. **The read is an onset detector, not a severity
-meter** — and no fixed map between them can exist, nor be calibrated, because on the rows where the
-departure is useful `-ln<sgn>` is identically zero and offers nothing to calibrate against.
+lies in `[0, 2]`. **The read is an onset detector, not a severity meter** — no map to `-ln<sgn>` is
+calibrated here, and on this data none can be, because on the rows where the departure is useful
+`-ln<sgn>` is identically zero and offers nothing to calibrate against. The severity is set by the
+parity of a crossing count, and the departure is a summary that has already discarded that count.
 
 ## The criterion
 
@@ -114,7 +116,7 @@ bond drawn at random and no symmetry designed in (residual `5e-14` to `1e-12`), 
 no cycles and nothing lattice-like about it — and frustrated topologies where it must fail.
 
 **The two routes are not interchangeable, and only one supplies the calibration.** Both give the
-identity and both give positivity. Only route B — the anti-similarity — forces `G_dn = 1 - G_up`
+identity; only route A leaves the weights real. Only route B — the anti-similarity — forces `G_dn = 1 - G_up`
 configuration by configuration, and with it the exactly calibrated `-1`. Where only route A is open
 the lattice is still sign-free and the identity still exact, but the channels are no longer exact
 negatives about `1/2` and the read comes back at **-0.945 to -0.993**: resolved, close, and not
@@ -181,8 +183,10 @@ affine relation saturates a normalised alignment at 1; a broken identity cannot.
 | identity fails (7 lattices) | `1.0e-3` to `2.9e-2` |
 
 **It agrees with the measured identity on 15 of 15 lattices, and with the algebraic criterion on 15
-of 15, using no Hamiltonian.** The two sides share no information: `coupling` sees two columns and
-never sees `K`; the criterion sees `K` and never sees a configuration. The departure is systematic
+of 15, using no Hamiltonian.** Neither side is given the other's input: `coupling` sees two columns
+and never sees `K`; the criterion sees `K` and never sees a configuration. The two populations are
+thirteen orders apart, so every cut between them returns the same 15 of 15 and none is chosen here.
+The departure is systematic
 rather than sampling — across a factor of four in sample size and three seeds, the saturated
 lattices stay at machine zero and the broken ones stay at `9.8e-4` to `1.4e-2` without shrinking.
 
@@ -194,6 +198,27 @@ Three uses: a **pilot** before committing cluster time; a **regression check** w
 (`t'`, a staggered field, a twist, a chemical potential) and nobody re-derives the colouring; and a
 **build check**, because the read follows what the code did rather than what the model was meant
 to be.
+
+What saturation decides is the **identity**, not positivity. On route B the identity holds and the
+weights still carry a phase — four such lattices read exactly saturated at sign deficits `0.08482`
+to `0.36442`. A saturated pilot rules out a broken pairing, not a sign problem.
+
+**The build check is the use the other two cannot cover**, because it is where the criterion is
+unavailable by construction: if the code may not be running the model its author believes, then the
+`K` and the `λ` a direct test would need are the suspect quantities. The read needs neither.
+Intended, an **open** 7-site chain — bipartite, and the criterion computed on it reports sign-free.
+As built, a periodic wrap, making a 7-site **ring**: an odd cycle, outside the class. The oracle is
+silent on every row, because it reads the model rather than the code.
+
+| `β` | negative fraction (4 seeds) | `1 − \|strength\|` | seed spread | correct-build control |
+|---|---|---|---|---|
+| 1 | **0.00000** | `1.904e-07` | `2.1e-09` | `1.1e-16` |
+| 2 | **0.00000** | `6.319e-05` | `5.8e-06` | `-2.2e-16` |
+| 3 | **0.00000** | `3.336e-04` | `6.1e-05` | `1.1e-16` |
+| 4 | 0.00125 | `7.381e-04` | `1.0e-04` | `0.0e+00` |
+
+At `β = 1` to `3` not one negative weight appears across four seeds, so every standard health check
+passes, while the read stands eleven orders above the correctly-built control at `β = 2`.
 
 **It fires before `<sgn>` does**, which is the point. On `2x4` with `t' = 0.3` at `β = 6`, 400
 configurations: the negative-weight fraction is **0.0000** — not one negative weight — while the
@@ -293,8 +318,8 @@ here.
 
 Of the 54 experiments the paper cites, 28 read through Entroptics and 26 do not, and all three
 gates cited in the text are instrument-free. §§3–5 derive and verify the identity and its
-criterion from the one-body matrix alone, §7 reads the same systems from their output, and the two
-share no code. They agree on 15 of 15 lattices.
+criterion from the one-body matrix alone, §7 reads the same systems from their output, and neither
+side is given the other’s input. They agree on 15 of 15 lattices.
 
 Every Entroptics read goes through the adapter, and a gate refuses any file that imports the
 library directly. The adapter adds no arithmetic: `test_entroptics_adapter.py` asserts each read *is*
@@ -314,7 +339,7 @@ across twelve modules, `sorry`-free, declaring no axiom of their own, every one 
 the three foundational axioms. They cover the model's algebra and, in `Alignment.lean`, what the
 read itself guarantees — that it is invariant to the offset and scale §4's identity carries, so the
 criterion can run on output with no Hamiltonian; that saturation is *equivalent* to an exact affine
-relation; and that the deficit cannot leave `[0, 2]`, which is why §7 detects onset and not severity.
+relation; and that the deficit cannot leave `[0, 2]`.
 The two that move from a sweep to a proof are
 
 * **the closed door on doping** — a diagonal conjugation leaves `K_ii` where it was, so both routes
@@ -340,7 +365,7 @@ cd research/code
 PYTHONPATH=. python tests/gate_fast.py                    # a gate, ~40 s
 PYTHONPATH=. python tests/validate.py                     # the sampler against enumeration, ~2 s
 PYTHONPATH=. python reads/expBA_oracle_superset.py        # the criterion against the identity
-PYTHONPATH=. python -m pytest tests -q                    # the suite: 523 tests
+PYTHONPATH=. python -m pytest tests -q                    # the suite: 536 tests
 ```
 
 On Windows `cmd` use `set PYTHONPATH=.` on its own line first; in PowerShell, `$env:PYTHONPATH='.'`.

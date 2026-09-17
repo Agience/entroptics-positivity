@@ -193,7 +193,7 @@ if __name__ == "__main__":
     print("A REMOVABLE PHASE, READ FROM THE WEIGHTS, AND THE SYMMETRY THAT EXPLAINS IT")
     print()
     print("`focus` is read by Entroptics from the weight cloud alone -- no K, no mechanism.")
-    print("`mono A` is the algebra, from K alone.  They share no information.")
+    print("`mono A` is the algebra, from K alone.  Neither is given the other's input.")
     print()
     print(f"{'lattice':>24} {'N':>3} | {'diag A':>7} {'mono A':>7} | {'modes':>5} {'focus':>8} "
           f"{'resultant':>10} {'after de-rot':>13} | {'identity':>11} {'deficit':>9}")

@@ -5,14 +5,14 @@ Everything else in this development is about the model. This file is about the I
 exists because three of the paper's load-bearing sentences are claims about the read rather than
 about the Hubbard model, and were carried in prose:
 
-  * §4.1: "the read is invariant to both the offset and the scale -- so neither constant has to be
+  * §6: "the read is invariant to both the offset and the scale -- so neither constant has to be
     known." That is what lets the criterion run on a simulation's output with no `K` in hand,
-    needing neither `lambda` nor `dtau L tr(K)`. If it were false, §4.1 would need both constants
+    needing neither `lambda` nor `dtau L tr(K)`. If it were false, §6 would need both constants
     and would not be a read on output at all.
-  * §4.1: "An exact affine relation must saturate a normalised alignment at 1. A broken identity
+  * §6: "An exact affine relation must saturate a normalised alignment at 1. A broken identity
     cannot." That is the criterion itself, and it is an equivalence rather than a correlation.
-  * §5.1: the deficit `1 + strength` lies in `[0, 2]` while `-ln<sgn>` is unbounded, which is why
-    §5 claims onset and not severity, and why no fixed map between the two can exist.
+  * §7.2: the deficit `1 + strength` lies in `[0, 2]`. That is the read's range, and it is proved
+    here; the onset-not-severity limit itself is §8's coarseness argument, not this bound.
 
 AT ONE COLUMN PER SIDE THE READ IS PEARSON'S `r`. The coupling read on two single-column frames is
 the centred, normalised alignment below -- which is what makes these theorems statements about the
@@ -69,20 +69,20 @@ theorem neg_one_le_strength (a b : EuclideanSpace ℝ (Fin n)) : -1 ≤ strength
 theorem strength_le_one (a b : EuclideanSpace ℝ (Fin n)) : strength a b ≤ 1 :=
   le_of_abs_le (abs_strength_le_one a b)
 
-/-- §5.1's deficit, `1 + strength`. -/
+/-- §7.2's deficit, `1 + strength`. -/
 noncomputable def deficit (a b : EuclideanSpace ℝ (Fin n)) : ℝ := 1 + strength a b
 
 /-- **The deficit is bounded in `[0, 2]`.**
 
-    Section 5 rests its onset-not-severity limit on exactly this: a quantity confined to `[0, 2]`
-    cannot be a monotone function of `-ln<sgn>`, which is unbounded above, so no fixed map between
-    the read and the severity exists -- not as a limitation of this read, but as arithmetic. -/
+    This is the read's range, and it follows from `strength` lying in `[-1, 1]` with no hypothesis
+    at all. It is the range the paper quotes; it does not by itself say anything about the
+    severity, which §8 reaches through the crossing count instead. -/
 theorem deficit_mem_Icc (a b : EuclideanSpace ℝ (Fin n)) : deficit a b ∈ Set.Icc (0 : ℝ) 2 := by
   have h₁ := neg_one_le_strength a b
   have h₂ := strength_le_one a b
   exact ⟨by unfold deficit; linarith, by unfold deficit; linarith⟩
 
-/-- The deficit is zero exactly at perfect anti-alignment, which is where §5's calibration sits:
+/-- The deficit is zero exactly at perfect anti-alignment, which is where §7.2's calibration sits:
     particle-hole symmetry gives `G_dn = 1 - G_up`, the centred channels are exact negatives, and
     the read returns `-1`. -/
 theorem deficit_eq_zero_iff (a b : EuclideanSpace ℝ (Fin n)) :
@@ -117,9 +117,9 @@ theorem centre_smul (a : EuclideanSpace ℝ (Fin n)) (q : ℝ) : centre (q • a
 
 /-- **The read is invariant to the offset and to a positive scale.**
 
-    This is §4.1's licence to run the criterion on output with no `K`: §3's identity carries an
+    This is §6's licence to run the criterion on output with no `K`: §4's identity carries an
     offset `-dtau L tr(K)` and a slope `lambda`, and neither survives to the read. A read that
-    needed them would need the Hamiltonian, and §4.1 would not exist. -/
+    needed them would need the Hamiltonian, and §6 would not exist. -/
 theorem strength_affine_invariant (a b : EuclideanSpace ℝ (Fin n)) (p q : ℝ) (hq : 0 < q)
     (hn : 0 < n) :
     strength (q • a + p • ones n) b = strength a b := by
@@ -145,7 +145,7 @@ theorem abs_strength_eq_one_iff (a b : EuclideanSpace ℝ (Fin n)) :
     |strength a b| = 1 ↔ centre a ≠ 0 ∧ ∃ r : ℝ, r ≠ 0 ∧ centre b = r • centre a :=
   abs_real_inner_div_norm_mul_norm_eq_one_iff _ _
 
-/-- The forward half, in the form §4.1 uses it: an exact affine relation saturates the read.
+/-- The forward half, in the form §6 uses it: an exact affine relation saturates the read.
 
     This is the direction the criterion runs in -- the identity holds, therefore the read must
     saturate -- and it admits no counterexample, which is what makes the measured agreement on 15
@@ -155,7 +155,7 @@ theorem abs_strength_eq_one_of_affine (a b : EuclideanSpace ℝ (Fin n)) (r : �
     |strength a b| = 1 :=
   (abs_strength_eq_one_iff a b).mpr ⟨hca, r, hr, h⟩
 
-/-- And the contrapositive, which is what the build check of §4.1 relies on: if the read does not
+/-- And the contrapositive, which is what the build check of §6.2 relies on: if the read does not
     saturate then no affine relation exists, so the identity is broken -- read off two logged
     columns, with no Hamiltonian and no knowledge of the decoupling. -/
 theorem no_affine_relation_of_abs_strength_ne_one (a b : EuclideanSpace ℝ (Fin n))
@@ -164,7 +164,7 @@ theorem no_affine_relation_of_abs_strength_ne_one (a b : EuclideanSpace ℝ (Fin
   rintro ⟨r, hr, hca, hb⟩
   exact h (abs_strength_eq_one_of_affine a b r hr hca hb)
 
-/-! ### The calibration of §5.1
+/-! ### The calibration of §7.2
 
 Particle-hole symmetry gives `G_dn = 1 - G_up` configuration by configuration. That is an affine
 relation with slope `-1`, so the read does not merely happen to come back at `-1` on the sign-free
@@ -201,7 +201,7 @@ theorem strength_eq_neg_one_of_reflected (a : EuclideanSpace ℝ (Fin n)) (c : �
   have hn0 : ‖centre a‖ ≠ 0 := fun h => hca (norm_eq_zero.mp h)
   field_simp
 
-/-- And the deficit is therefore exactly zero there, which is the quantity §5 reports as the order
+/-- And the deficit is therefore exactly zero there, which is the quantity §7 reports as the order
     parameter's floor. -/
 theorem deficit_eq_zero_of_reflected (a : EuclideanSpace ℝ (Fin n)) (c : ℝ) (hn : 0 < n)
     (hca : centre a ≠ 0) :

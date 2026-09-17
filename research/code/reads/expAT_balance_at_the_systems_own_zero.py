@@ -10,8 +10,9 @@ This system has its own zero.  At half filling on a bipartite lattice the two ch
 the particle-hole point.  The library's default zero is the column mean, which is the sample's own
 centre and therefore says nothing about where the system balances.
 
-WITH THE DEFAULT ZERO THE READ IS BLIND.  Measured: `closed` is True on 5 of 5 seeds for every
-case tried, sign-free and sign-problem alike.  With the system's own zero it separates.
+WITH THE DEFAULT ZERO THERE IS NO READ.  The default zero IS the column mean, so the residual
+scored against it is identically zero and the pvalue is exactly 1 whatever the data -- an identity,
+not a measurement.  The control column is printed to show that the separation belongs to the zero.
 
 READ THE PVALUE, NOT THE BOOLEAN.  `closed` is a per-run decision at the reader's level and
 fluctuates: on a sign-free ring it fires 9 times in 12.  The pvalue behind it is the quantity, and
@@ -102,5 +103,7 @@ if __name__ == "__main__":
         print(f"{name:>20} {sp:>13} | {np.mean(ds):8.4f} | {np.median(own):19.5f} "
               f"{sum(cl):3d}/{len(SEEDS):<3d} | {np.median(dflt):23.5f}", flush=True)
     print()
-    print("The DEFAULT column is the control and it is the point: withhold the system's law and")
-    print("the read is blind on every row. The separation belongs to the zero, not to the read.")
+    print("The DEFAULT column is an identity, not a measurement: the default zero IS the column")
+    print("mean, so the residual scored against it is identically zero and the pvalue is exactly")
+    print("1 whatever the data. Withholding the system's law does not weaken the read, it removes")
+    print("it -- so the separation in the OWN column belongs entirely to the zero.")

@@ -6,7 +6,7 @@ theorem. What it also has is an algebraic spine -- the identity of section 3, th
 section 4, the ceiling of section 8 -- and several of the paper's statements are universally
 quantified claims that a sweep can only sample. Those are the ones formalised here. The division is
 deliberate and it is stated in the paper's section 10: a claim that reads "at any size, on any
-graph, at any flux" belongs in Lean, and a claim that reads "measured at 137 sigma" does not.
+graph, at any flux" belongs in Lean, and a claim that reads "measured on this rig" does not.
 
 Two statements in particular were carried by measurement where a proof was available, and both are
 now proved:

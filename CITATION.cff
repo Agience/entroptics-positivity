@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it."
 title: "Reading Positivity from the Weights Alone"
-abstract: "Given only the weights a running determinantal quantum Monte Carlo simulation already holds -- no Hamiltonian, no knowledge of the decoupling, and no constant chosen by the caller -- what can be decided about its positivity? The answer is a build check a run can perform on itself. An identity between the two spin channels' determinants makes ln|det_up| - ln|det_dn| an exact affine function of the field sum, a normalised alignment saturates on an affine relation and cannot on a non-affine one, and that alignment is invariant to both the offset and the slope, so the check needs neither the decoupling constant nor tr(K) -- only two scalars every determinant QMC code already forms each sweep. On a lattice built with a periodic wrap where an open one was intended, the read fires at beta = 1 to 3 while not one negative weight has appeared and every standard health check passes. A second reading classifies the run from the weight cloud alone: a directional statistic and an axial one sort it into sign-free, a real sign problem, or a phase problem no rotation reaches, and the sign problem is the rank-one case of a phase problem. Each read is identified with the standard statistic it computes. The reading is scored against an independent oracle computed from the one-body matrix, sharing no code with it. The algebraic core -- the log-determinant identity, the positivity criterion and its two routes, the closed door on doping, the effective-sample ceiling, magnitude blindness at every exponent, and what the alignment read guarantees -- is machine-checked in Lean 4 / Mathlib, sorry-free and on the three foundational axioms. Every machine-precision figure quoted in the paper is printed by the named file the paper attributes it to. This repository holds the paper, the Lean verification, the reads, and the determinantal quantum Monte Carlo machinery they run on."
+abstract: "Given only the weights a running determinantal quantum Monte Carlo simulation already holds -- no Hamiltonian, no knowledge of the decoupling, and no constant chosen by the caller -- what can be decided about its positivity? The answer is a build check a run can perform on itself. An identity between the two spin channels' determinants makes ln|det_up| - ln|det_dn| an exact affine function of the field sum, a normalised alignment saturates on an affine relation and cannot on a non-affine one, and that alignment is invariant to both the offset and the slope, so the check needs neither the decoupling constant nor tr(K) -- only two scalars every determinant QMC code already forms each sweep. On a lattice built with a periodic wrap where an open one was intended, the read fires at beta = 1 to 3 while not one negative weight has appeared and every standard health check passes. A second reading classifies the run from the weight cloud alone: a directional statistic and an axial one sort it into sign-free, a real sign problem, or a phase problem no rotation reaches, and the sign problem is the rank-one case of a phase problem. Each read is identified with the standard statistic it computes. The reading is scored against an independent oracle computed from the one-body matrix, and neither side is given the other's input: the read never receives K, the oracle never receives a configuration. The algebraic core -- the log-determinant identity, the positivity criterion and its two routes, the closed door on doping, the effective-sample ceiling, magnitude blindness at every exponent, and what the alignment read guarantees -- is machine-checked in Lean 4 / Mathlib, sorry-free and on the three foundational axioms. Every machine-precision figure quoted in the paper is printed by the named file the paper attributes it to. This repository holds the paper, the Lean verification, the reads, and the determinantal quantum Monte Carlo machinery they run on."
 type: software
 authors:
   - given-names: Ikailo John
@@ -9,8 +9,8 @@ authors:
     email: john@ikailo.com
     affiliation: Ikailo Inc.
     orcid: "https://orcid.org/0009-0002-0150-4027"
-repository-code: "https://github.com/Agience/entroptics-sign-problem"
-url: "https://github.com/Agience/entroptics-sign-problem"
+repository-code: "https://github.com/Agience/entroptics-positivity"
+url: "https://github.com/Agience/entroptics-positivity"
 license: Apache-2.0
 version: 0.2.0
 date-released: "2026-09-16"
@@ -37,4 +37,4 @@ references:
     url: "https://doi.org/10.5281/zenodo.22687899"
     repository-code: "https://github.com/Agience/entroptics"
     license: Apache-2.0
-    date-released: "2026-09-10"
+    date-released: "2026-09-09"

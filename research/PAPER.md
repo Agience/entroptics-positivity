@@ -9,19 +9,23 @@
 > **A note on measurement.** Every empirical quantity in this paper is a deterministic read of a
 > configuration produced by the determinantal quantum Monte Carlo sampler in `research/code/`. The
 > sampler is gated against a brute-force enumeration of every auxiliary field at 5e-15. No
-> constant, threshold or fitted parameter is supplied to any read; where a coefficient appears it
-> is derived and the derivation is checked by requiring the wrong coefficient to fail.
+> fitted parameter is supplied to any read, and one constant is: the particle-hole zero `1/2` of
+> §7's own-zero read, which follows from `G_up[i,i] + G_dn[i,i] = 1` rather than being tuned. The
+> one threshold in play is the library's own significance level `far = 0.05`, left at its default;
+> it gates `resolved`, which §6.2 reports on the degenerate input. Elsewhere a coefficient
+> that appears is derived, and the derivation is checked by requiring the wrong coefficient to fail.
 >
 > **Which results use the instrument, and which do not.** Of the 54 experiments cited here, 28 read
 > through the open-source *Entroptics* instrument
 > ([github.com/Agience/entroptics](https://github.com/Agience/entroptics), version 0.2.3,
 > [doi:10.5281/zenodo.22687899](https://doi.org/10.5281/zenodo.22687899)) and 26 do not. All three
-> gates cited in the text -- the lockstep, the identity, and the conditioned frame -- are
+> checks the argument rests on -- the lockstep, the identity, and the conditioned frame -- are
 > instrument-free. §§3-5 derive and verify the identity and its criterion from the one-body matrix;
-> §7 reads the output with the instrument. The two sides share no code, and agree on 15 of 15
+> §7 reads the output with the instrument. Neither side is given the other's input -- the read never
+> receives `K`, the criterion never receives a configuration -- and they agree on 15 of 15
 > lattices. Reads are reached through one domain adapter
 > (`research/code/entroptics_adapter.py`) which names each library read after the question §7 asks
-> of it and holds the version pin; a gate refuses any file that imports the instrument directly.
+> of it and holds the version the figures were read through.
 >
 > **What is proved.** The paper's algebraic statements are machine-checked in Lean 4 / Mathlib
 > (§11, `research/lean/`), `sorry`-free and on the three foundational axioms: the log-determinant
@@ -73,8 +77,8 @@ complex one.
 rotations that leave `|<w>|` unmoved -- and would overstate a cost that goes as `1/<sgn>^2` by
 fourteen times.
 
-**The reading is validated against an independent oracle computed from the Hamiltonian, and the
-two sides share no information.** A configuration's weight is a product of two determinants, one
+**The reading is validated against an independent oracle computed from the Hamiltonian, and neither
+side is given the other's input.** A configuration's weight is a product of two determinants, one
 per spin channel; on a bipartite lattice at half filling they change sign **in lockstep** -- around
 11% of configurations at `beta = 12`, on exactly the same ones -- so the product's sign never
 changes. That lockstep follows from an identity between the two determinants, derived and verified
@@ -102,7 +106,8 @@ both channels is invisible to a comparison between them: systems whose negative 
 33 percentage points give identical reads. The ceiling on what any such read can deliver is exact:
 correct importance sampling draws at `|w|`, so Kish's effective sample size of those weights is
 exactly `n <sgn>^2`, a property of the weights and therefore a ceiling on every aggregation of
-them. The read detects onset rather than severity, and no fixed map between the two exists.
+them. The read detects onset rather than severity: it moves on rows where `<sgn>` is still
+identically 1, and severity is set by a crossing count the read has already summed away.
 
 ---
 
@@ -224,7 +229,8 @@ The conditioned frame comes from the UDT factorisation [3]. With `I + U D T = U 
 `prod(Db) > 0`, the sign is carried entirely by `det(U) det(T) det(M)`, and `M` is bounded by
 construction because `Db >= 1` divides the large block and `Ds <= 1` is the small one.
 
-Three properties are asserted as gates (`tests/test_conditioned_frame.py`):
+Three properties hold, and each is checked against a case that must break it
+(`tests/test_conditioned_frame.py`):
 
 * **two independent routes agree.** The block formulation and the core factorisation reach the
   sign by different arithmetic and agree on every configuration measured. The two routes must be
@@ -233,8 +239,8 @@ Three properties are asserted as gates (`tests/test_conditioned_frame.py`):
 * **the answer does not move with the stabilisation block.** Every configuration's sign is
   compared across three block sizes, not just the totals, so agreement cannot come from
   cancellation.
-* **the naive frame fails.** Without this the suite would pass equally on a build that had
-  silently reverted, by being a different and wrong calculation.
+* **the naive frame fails.** A check that cannot fail establishes nothing, so the unstabilised
+  product is run alongside and must report the sign problem that is not there.
 
 Everything that follows is read in this frame.
 
@@ -263,11 +269,12 @@ read separately in the conditioned frame of §2; five seeds, errors from the see
 | 12 | 0.4 | 0.0413 +- 0.0077 | 0.0417 | 0.9283 +- 0.0049 | 0.0717 | exact |
 
 **Some columns are estimates and some are not.** The two flip
-rates are proportions of 600 draws; the up column carries its spread across seeds, and the down
-column sits beside it because the two being equal is a claim of its own rather than a repetition.
+rates are proportions of 600 draws and the up column carries its spread across seeds.
 The agreement is not an estimate: at half filling the two channels change sign on *exactly* the
 same configurations, so the column reads `1.0000` with zero spread on every seed rather than
-averaging to it. The last column
+averaging to it. With the agreement exact, the two flip rates are equal by entailment and the down
+column repeats the up one; it is printed because on the doped rows, where the agreement is broken,
+the two come apart. The last column
 is likewise an identity checked configuration by configuration, not a fitted correspondence -- the
 disagreement fraction **is** the negative-weight fraction, on doped rows as well as half-filled
 ones.
@@ -275,10 +282,10 @@ ones.
 The half-filled rows establish two things together, and neither alone would do. The individual
 channels **do** change sign, on around 11% of configurations by `beta = 12`, so the lockstep is not
 a statement about a quantity that never moves. And they change sign on the same configurations
-every time. The two rates are also **exactly** equal at half filling -- `0.1120` and `0.1120`, and
-so on every half-filled row to four decimals -- while the doped rows are merely close (`0.0220`
-against `0.0200` at `beta = 8`). That
-exact equality is itself a half-filling statement and not a generic one: it is
+every time, which is what makes the two rates **exactly** equal at half filling -- `0.1120` and
+`0.1120`, and so on every half-filled row to four decimals -- while the doped rows are merely close
+(`0.0220` against `0.0200` at `beta = 8`). The agreement is a half-filling statement and not a
+generic one: it is
 `det_dn(x) = det_up(-x)` meeting a field distribution symmetric under `x -> -x`, and doping breaks
 the second of those.
 
@@ -669,18 +676,21 @@ at 1. A broken identity cannot (`reads/expAW_criterion_from_output.py`, 2x4 and 
 | identity fails (7 lattices) | `1.0e-3` to `2.9e-2` |
 
 **The read agrees with the measured identity residual on 15 of 15 lattices, and with §5's algebraic
-criterion on 15 of 15, using no Hamiltonian.** The two sides share no information: `coupling` sees
-two columns and never sees `K`; the criterion sees `K` and never sees a configuration.
+criterion on 15 of 15, using no Hamiltonian.** Neither side is given the other's input: `coupling`
+sees two columns and never sees `K`; the criterion sees `K` and never sees a configuration. The
+agreement is counted against a cut on `1 - |strength|`, and the two populations are thirteen orders
+apart -- `2.2e-16` against `1.0e-3` -- so every cut in that gap returns the same 15 of 15. No cut is
+chosen here because none of them differ.
 
 *The departure is systematic rather than sampling noise.* Across a factor of four in sample size
 and three seeds, the saturated lattices stay at machine zero and the broken ones stay at `9.8e-4`
 to `1.4e-2` without shrinking. A departure that fell as `n` grew would be the read reporting its
-own variance. The suite gates this as an assertion.
+own variance.
 
 *What it costs and what it is for.* Two columns a simulation already has, and one read -- `O(n)`
 after determinants that were computed anyway, against a criterion that otherwise needs the
-Hamiltonian's structure. It turns "is this model sign-free" from a question asked once on paper
-into a check a run can perform on itself.
+Hamiltonian's structure. It turns "does this model still satisfy §4's identity" from a question
+asked once on paper into a check a run can perform on itself.
 
 ### 6.1 How it is used
 
@@ -693,7 +703,10 @@ Log two scalars per configuration. Both are already computed by any determinant 
 Then one call, `coupling(A, B)`, and read whether it saturates. Three places to do it:
 
   1. **As a pilot, before committing to a production run.** A few hundred configurations at small
-     `beta` decide whether the model *as assembled* sits in the sign-free class.
+     `beta` decide whether §4's identity holds for the model *as assembled*. That is the identity
+     and not positivity: on §5's route B the identity holds and the weights still carry a phase, and
+     §7.1 measures four such lattices where the read is exactly saturated and the sign deficit runs
+     from `0.08482` to `0.36442`. A saturated pilot rules out a broken pairing, not a sign problem.
   2. **As a regression check.** A sign-free setup acquires a term -- `t'`, a staggered field, a
      boundary twist, a chemical potential. The two-colouring is rarely re-derived when a term is
      added; this catches it from the output.
@@ -724,7 +737,8 @@ check passes, while the read stands eleven orders above the correctly-built cont
 and between `5.5` and `91` times its own seed spread. From `beta = 4` the sign fires too and the
 read is no longer needed.
 
-**The scope has two provable limits.** A wrong decoupling constant -- the continuous Gaussian
+**The scope has two provable limits: one blind spot, and one degenerate input the read reports.**
+A wrong decoupling constant -- the continuous Gaussian
 `sqrt(dtau U)` used in the discrete field -- is **not** detected: `1 - |strength|` is `-2.2e-16`,
 exactly saturated, because rescaling an affine relation leaves it affine. Scale invariance is why
 the read needs no `lambda` and why it cannot see a wrong one; the two are the same fact, and the
@@ -921,7 +935,7 @@ asserted, so a row cannot be read unless its flux is doing something.
 Three quantities have now been checked for whether they measure severity -- the identity residual
 (§5), the coupling strength, and the coupling tightness -- and none does. The severity is the
 negative fraction, and the negative fraction is a count of parity disagreements. §8 gives the
-reason no continuous summary reaches it.
+reason none of the three reaches it: each has already summed that count away.
 
 ### 7.2 The coupling read, and its exact calibration
 
@@ -968,18 +982,21 @@ capability table below (`reads/expBH_perpendicular_violation.py`):
 
   The quadratic form is the leading term of `1 - cos`, so it is close where the angle is small and
   low once it is not: the miss grows monotonically from `1.68%` to `13.92%` as the deficit grows by
-  a factor of six. Past the shallow rows the exact cosine is what holds, and the exact cosine is
-  what the read computes. The deficit column is the capability table's own, which is what makes the
-  comparison a statement about these chains rather than about a synthetic frame.
+  `5.6x`. Both columns come from the same run, so the relative miss is exact within it
+  and carries the digits shown; the deficit's own reproducibility across seeds is the capability
+  table's (`reads/expAN_capability_table.py`) -- `0.6%` at the top and `10.4%` at `beta = 6`, so
+  the last row's deficit is `0.20` as a measurement, not `0.20127`. Past the shallow rows the
+  exact cosine is what holds, and the exact cosine is what the read computes. The deficit column is the capability table's own, which is
+  what makes the comparison a statement about these chains rather than about a synthetic frame.
 
 So the order parameter is the **angle between the two centred channel frames**, and what it tracks
 as filling or temperature moves is the growth of the component of the particle-hole violation that
-cannot be absorbed into a rescaling. That is why it is an onset detector: an angle is bounded, and
-`-ln<sgn>` is not.
+cannot be absorbed into a rescaling. That is why it is an onset detector: the angle moves as soon
+as the violation appears, which is before `<sgn>` has left 1.
 
 **The calibration comes from one of §5's two routes, not from the identity.** §5 shows the identity
-holds when either `S K S^-1 = -K` (route A) or `S K S^-1 = -conj(K)` (route B) is available. Both
-give positivity. Only route B gives the exact particle-hole relation, and with it the exact `-1`
+holds when either `S K S^-1 = -K` (route A) or `S K S^-1 = -conj(K)` (route B) is available. Only
+route B gives the exact particle-hole relation, and with it the exact `-1`
 (`reads/expBD_route_calibration.py`, 250 configurations per row; the criterion itself is
 `reads/expAO_spectral_criterion.py`, and the separation is gated in
 `tests/test_spectral_criterion.py`):
@@ -1050,18 +1067,25 @@ four seeds, errors from the seed spread):
 | 6.0 | 0.48633 +- 0.00733 | 0.201 +- 0.021 | 10.4% | 106.5 |
 
 The first two rows are the capability. `<sgn>` is an average of a binary: where the channels are
-locked it is identically 1 with zero variance and no derivative. The coupling has already moved,
-and is resolved at 137 sigma.
+locked it is identically 1 with zero variance and no derivative. The coupling has already moved:
+`0.03574 +- 0.00022` across four seeds, which is 162 times its own seed spread away from
+saturation, on a row where `<sgn>` has no derivative at all.
 
-*`|z|` falls while the deficit rises, and the reason is in the chain rather than in the read.* The
-deficit grows by `5.6x` down the table and `|z|` drops from `136.9` to `106.5`, so the null's spread
-grows faster than the signal. That is the same fact §9.2c measures directly: `beta` lengthens the
-imaginary-time extent and slows the chain, taking `2 tau` for the influence function from `2.60x` at
-`beta = 2` to `4.24x` at `beta = 4`, so a fixed number of sweeps carries less independent
-information at the bottom of the table than at the top. The reproducibility column is the same thing
-seen from the seeds: `0.6%` where the claim lives, `10.4%` at `beta = 6`. `|z|` is therefore a
-statement about this sampling budget at that `beta`, not a property of the read, and the rows that
-carry §7's claim are the ones where `<sgn>` has no derivative at all.
+*What `|z|` is, and what it is not.* `|z|` is the instrument's own resolution against its exact
+re-pairing null, and that null is centred at `strength = 0`. For a single pair of columns it is
+exactly `|strength| sqrt(n - 1)` -- pinned at nine settings in
+`tests/test_the_reads_are_the_statistics_named.py` -- so it answers whether the two channels are
+coupled at all, which is not the claim of this section. It is reported because `resolved` gates on it: an unresolved read returns `strength = 0`
+rather than a number. It scales with the sampling budget rather than with the physics -- `50` at
+`R = 24, n_meas = 15` against `137` at `R = 64, n_meas = 40` on the same rows -- and it falls down
+the table because `|strength|` falls, which is the deficit rising. The claim that the deficit has
+moved is carried by the seed spread in the table, not by `|z|`.
+
+*The re-pairing null assumes exchangeability, and these are Markov chains.* §9.2c measures `2 tau`
+for the influence function at `2.60x` at `beta = 2` and `4.24x` at `beta = 4`, so successive sweeps
+are not independent and the permutation null understates the spread a re-pairing would really have.
+`|z|` is optimistic by roughly that factor's square root. This does not reach the seed-spread
+errors, which are taken across independent chains and carry the autocorrelation already.
 
 **The rows are quoted to the precision they reproduce to, which is not the same precision.** The
 deficit is reproducible to under 1% where the claim lives and to 10% at `beta = 6`, so the deep
@@ -1139,9 +1163,12 @@ independent runs per row:
 | ring 5, flux `pi/2` | phase | 0.1545 | 0.48993 | 1.00000 |
 | tri ladder, flux `pi/2` | phase | 0.4792 | 0.37657 | 1.00000 |
 
-**The last column is the control and it carries the result.** Withhold the system's law and the read
-is blind on every row -- median `1.00000` throughout, sign-free and sign-problem alike. The
-separation belongs to the zero, not to the read.
+**The last column is an identity rather than a measurement, and that is the point.** The default
+zero is the column mean, so the residual it scores is the centred sample's own mean -- identically
+zero -- and the pvalue is exactly `1.00000` whatever the data, which
+`tests/test_the_reads_are_the_statistics_named.py` pins on random columns at four offsets and
+sizes. Withholding the system's law does not weaken the read, it
+removes it, and the separation in the previous column therefore belongs entirely to the zero.
 
 *What the read is.* `balance` scores the joint residual `||r||^2` against the
 exact no-drift moments `E||r||^2 = tr(S)/T` and `Var||r||^2 = 2 tr(S^2)/T^2`, which fix a scaled
@@ -1196,15 +1223,16 @@ the two channels' Green's-function diagonals and nothing else; the sign is colle
 never enters it (`reads/expQQ_coupling_vs_sign.py`, and asserted in
 `tests/test_the_reads_are_the_statistics_named.py`). It is an unweighted statistic of the
 configurations the `|w|` sampler visits, so it does not pay the `1/<sgn>^2` cost -- which is
-exactly why it resolves at 137 sigma on rows where `<sgn>` is `1.00000 +- 0.00000` and has no
+exactly why it carries a converged value on rows where `<sgn>` is `1.00000 +- 0.00000` and has no
 derivative to read. What it reports is a property of the ensemble the sampler actually visits, and
-the reason it cannot report severity is the bound below, not this ceiling.
+the reason it cannot report severity is the coarseness below, not this ceiling.
 
 **The read is an onset detector rather than a severity meter.**
-Extrapolating the deficit outward is bounded by construction -- the deficit lies in `[0, 2]` while
-`-ln<sgn>` is unbounded -- so no fixed map from one to the other can hold globally. Nor can such a
-map be calibrated: on the rows where the deficit is useful, `<sgn>` is identically 1 and
-`-ln<sgn>` is identically 0, so there is nothing there to calibrate against.
+No map from the deficit to `-ln<sgn>` is calibrated here, and on this data none can be: on the rows
+where the deficit is useful, `<sgn>` is identically 1 and `-ln<sgn>` is identically 0, so there is
+nothing there to calibrate against. §8 gives the reason this is not a matter of more data -- the
+severity is set by the parity of a crossing count, and the deficit is a summary that has already
+discarded that count.
 
 **The reading is a synchronisation, and the sign of it is set by the mechanism.** A read that
 returned `-1` wherever the model is sign-free would be indistinguishable from a read that had
@@ -1732,8 +1760,8 @@ Relative to the single-determinant walk, a run of `closed/expKK_multidet_bias.py
 `0.379`, `0.044` at `U = 4` for `k = 2, 4, 6`, and `1.165`, `0.493`, `0.079` at `U = 8`: the second
 determinant helps at weak coupling and *hurts* at strong. Only the `U = 12` reversal clears its own
 error bars on that run -- `3.2` standard errors from the quoted biases, against `1.0` at `U = 8`
-and `0.1` at `U = 4`. A separate run gives `0.810`, `0.327`, `0.368` at `U = 4`, so the direction
-survives a re-run and the digits do not.
+and `0.1` at `U = 4`. A second run of the same script gives `0.777`, `0.398`, `0.072` at `U = 4`,
+so the direction survives a re-run and the digits do not.
 
 *The fit is why.* It does not reproduce across processes
 (`closed/expBF_multidet_reproducibility.py`): three refits inside one process agree to all
@@ -1808,8 +1836,8 @@ configuration enters any weighted average carrying only its sign, and Kish's eff
 of those weights is exactly `n <sgn>^2`. Because that number is a property of the **weights**, it
 bounds every estimator that reweights by them. §7's coupling read does not reweight -- it is an
 unweighted statistic of the configurations the `|w|` chain visits -- which is why it is readable
-where `<sgn>` is not; what stops it reporting severity is that the deficit is confined to `[0, 2]`
-while `-ln<sgn>` is unbounded.
+where `<sgn>` is not; what stops it reporting severity is §8's coarseness -- the read has already
+summed away the crossing count the severity is set by.
 
 The blindness is two distinct statements. Where the two channels coincide as data, no comparison
 between them remains. Where they are distinct and **exactly related** -- §5's route B, at `5e-15` --
@@ -1832,20 +1860,21 @@ stability window picks a width. Under this paper's rules none is admissible.
 `spectral_optics` reports `resolved_modes`, a count against a floor derived from the data rather
 than supplied, which is model-order selection performed by the read. It does not work here, and
 the reason is structural: on the Hankel embedding of a sum of decaying
-exponentials it returns **1 for every true order above 1**, at every noise level including none,
-while the same matrix has exact numerical rank 2 and 3 with singular values an order of magnitude
-apart (5.42 and 0.46 at order 2). The leading mode carries a `top_share` of 0.994 to 0.996 there:
+exponentials it returns **1 on all four test cases** -- true orders 2 and 3, well separated and
+close, at each of four noise levels from none to `1e-2`, five seeds apiece -- while the same matrix
+has exact numerical rank 2 and 3 with singular values an order of magnitude apart (5.42 and 0.46 at
+order 2). The leading mode carries a `top_share` of 0.994 to 0.996 there:
 the modes are real and wildly unequal, and a floor that separates signal from a noise sea is asking
 a different question from "how many modes are there".
 
 So the row stays open, with one route into it closed by measurement.
 
 **What the measurement supplies.** The order parameter of §7 gives an exactly
-calibrated, continuously varying measure of distance from the protecting symmetry, readable at
-137 sigma in a regime where the average sign is identically 1 and has no derivative. It does not
-forecast severity: it is bounded in `[0, 2]` while `-ln<sgn>` is unbounded, and §8 gives the
-reason no continuous summary reaches the severity -- the severity is a count of parity
-disagreements, and a parity is a global property of a spectrum that no scalar determines.
+calibrated, continuously varying measure of distance from the protecting symmetry, reproducible to
+under 1% across seeds in a regime where the average sign is identically 1 and has no derivative.
+It does not forecast severity: §8 gives the
+reason no summary of this kind reaches the severity -- the severity is set by the parity of a
+crossing count, and a count modulo two cannot be recovered from a quantity that never encoded it.
 
 **The open question this leaves.** Whether the synchrony can be restored by construction, rather
 than measured. Every route in §9 that attempted it worked on the field, the contour, or the trial
@@ -1865,31 +1894,29 @@ lemmas across twelve modules. The development declares no axiom of its own and c
 `sorry`. Every theorem the table below names -- 48 of the 81 -- carries an explicit
 `#print axioms`, and each elaborates against Lean's three foundational axioms alone: `propext`,
 `Classical.choice`, `Quot.sound`. The other 33 are the supporting lemmas those theorems are built
-from, elaborated by the same build. CI checks every printed footprint against the three, and
-refuses a run that printed
-none, because "no axiom outside the three" and "nothing elaborated" would otherwise look the same
-to a grep. `research/code/lean_build.py` runs the build, on this machine unless a machine
-for it is configured.
+from, elaborated by the same build. The footprint is emitted while a declaration elaborates, so it
+is a property of the proof and not a claim made about it.
 
 **What is not in Lean.** Every number read from a running sampler. The lockstep at
-`beta = 12`, the `-1.0000` calibration, the 137-sigma resolution, the 15-of-15 agreement between the
+`beta = 12`, the `-1.0000` calibration, the measured deficits, the 15-of-15 agreement between the
 oracle and the read -- these are properties of this model measured on this rig, and formalising them
 would mean formalising the rig.
 
 What the development covers, beyond the model's own algebra, is the read: not what it returned
 here, but what it is guaranteed to return. §6 rests on the alignment being invariant to an
-offset and a scale, and on saturation being equivalent to an exact affine relation; §7.2 rests on
-the deficit being confined to `[0, 2]`. Those were prose, and they are `Alignment.lean` now. With
+offset and a scale, and on saturation being equivalent to an exact affine relation, with the
+deficit's `[0, 2]` range proved alongside them. Those were prose, and they are `Alignment.lean`
+now. With
 them the agreement on 15 lattices becomes a check that this rig computes the criterion correctly,
 rather than the evidence that the criterion works.
 
-**The theorems are about the read that is actually called, and the suite checks that.** A proof
-about a normalised alignment and an implementation computing something slightly
-different would be two correct halves and one wrong whole, and neither half can reveal that on its
-own. `tests/test_the_read_has_the_proved_properties.py` puts the three guarantees to
-`coupling.strength` itself: invariance to an offset and a positive scale, saturation exactly on
-affine data, and the `[0, 2]` bound -- each to `1e-12`, each with a negative control, including an
-uncentred cosine exhibited failing the invariance so the comparison is shown able to discriminate.
+**The theorems are about the read that is actually called.** A proof about a normalised alignment
+and an implementation computing something slightly different would be two correct halves and one
+wrong whole, and neither half can reveal that on its own. The three guarantees are therefore put to
+`coupling.strength` itself and hold to `1e-12`: invariance to an offset and a positive scale,
+saturation exactly on affine data, and the `[0, 2]` bound. Each is checked against a case that must
+fail it -- an uncentred cosine breaks the invariance -- so the agreement is shown able to
+discriminate (`tests/test_the_read_has_the_proved_properties.py`).
 
 The development covers the algebraic spine and what the instrument guarantees. The result is the
 measurement.
@@ -1931,7 +1958,7 @@ so the blindness is a property of magnitude reads.
 | what the parity argument rules out, and what it does not (§8) | `Parity.lean` | proved -- `sign_not_continuousAt_zero` and `no_continuous_function_is_the_sign` (no continuous function equals the sign) against `det_determines_sign` (a continuous one determines it). The obstruction is coarseness rather than regularity |
 | **the alignment read is invariant to an offset and a positive scale** (§6) | `Alignment.lean` | proved -- `strength_affine_invariant`, with `centre_add_const` and `centre_smul` underneath it. This is what lets the criterion run on output with no `K`: §4's identity carries an offset `-dtau L tr(K)` and a slope `lambda`, and neither survives to the read |
 | **saturation at 1 is exactly an affine relation between the two columns** (§6) | `Alignment.lean` | proved -- `abs_strength_eq_one_iff`, an equivalence via Cauchy-Schwarz's equality case, with `abs_strength_eq_one_of_affine` as the direction the criterion runs in and `no_affine_relation_of_abs_strength_ne_one` as the one the build check uses |
-| the deficit is confined to `[0, 2]`, so no fixed map to the severity exists (§7.2) | `Alignment.lean` | proved -- `abs_strength_le_one` (Cauchy-Schwarz, no hypothesis at all) and `deficit_mem_Icc`; `-ln<sgn>` is unbounded above, and a bounded quantity is not a monotone function of an unbounded one |
+| the read lies in `[-1, 1]` and the deficit in `[0, 2]` (§7.2) | `Alignment.lean` | proved -- `abs_strength_le_one` (Cauchy-Schwarz, no hypothesis at all) and `deficit_mem_Icc` |
 | **§7.2's calibration is forced, not measured**: `G_dn = 1 - G_up` makes the read exactly `-1` | `Alignment.lean` | proved -- `strength_eq_neg_one_of_reflected` and `deficit_eq_zero_of_reflected`. A reflected column centres to the negative of the original, so the read has no other value available to it; the paper's `-1.0000` is an entailment, not a coincidence |
 | the criterion is not vacuous | `Alignment.lean` | proved -- `centre_sample_ne_zero` exhibits a column the read is defined on, and `not_affinely_related` exhibits two columns that are not affinely related, so neither side of the equivalence is empty |
 | a sign is the rank-one case of a phase; de-rotation is exact and preserves `\|<w>\|` (§7.1) | `RankOne.lean` | proved -- `derotation_is_exact`, `derotation_preserves_mean_modulus`, `rank_one_phase_is_two_valued`; `real_part_estimator_is_not_rotation_invariant` is the mechanism behind the `0.93500 -> 0.25011` fall |
@@ -2034,14 +2061,13 @@ doi:10.1103/PhysRevLett.102.131601 — the complex-Langevin route attempted in �
 **The instrument.**
 
 [E] Entroptics, version 0.2.3, [doi:10.5281/zenodo.22687899](https://doi.org/10.5281/zenodo.22687899)
-(released 2026-09-10). That is the version DOI, not the concept DOI
+(released 2026-09-09). That is the version DOI, not the concept DOI
 [10.5281/zenodo.21273400](https://doi.org/10.5281/zenodo.21273400), which resolves to whatever the
 latest release is; every figure here was read through version 0.2.3.
 Every read is reached through `research/code/entroptics_adapter.py`, which names each one after the
-question this paper asks of it and holds the version pin. The counts below are how many of the 54
-cited experiments call each, counted over the syntax tree rather than by matching text.
-`denoise` is listed in the appendix note below rather than here: it is reached through the adapter
-and no figure in the paper is read with it.
+question this paper asks of it. The counts below are how many of the 54 cited experiments call
+each. `denoise` is listed in the note below rather than here, because no figure in this paper is
+read with it.
 
 | adapter | library read | § | calls |
 |---|---|---|---|
@@ -2061,11 +2087,10 @@ rather than asymptotic, which is what lets §7 quote a sigma with no constant su
 the `tau_int` that shows the same ceiling is not tight. Where a Tracy-Widom comparison is made,
 the external reference is [14].
 
-One adapter read is exposed and used by no figure here. `denoise` (`Aperture.extract`) was scored
-as an estimator of a mean in `reads/expRR_natural_noise.py` and is the wrong tool for this problem
--- optimal shrinkage recovers a low-rank signal and biases a mean, and the sign problem's
-difficulty is entirely in a mean. The experiment and the measurement stay in the repository, and
-the adapter's own docstring carries the result where a reader reaching for the read will meet it.
+One read is named above and used by no figure here. `denoise` (`Aperture.extract`) was scored as
+an estimator of a mean in `reads/expRR_natural_noise.py` and is the wrong tool for this problem:
+optimal shrinkage recovers a low-rank signal and biases a mean, and the sign problem's difficulty
+is entirely in a mean.
 
 [14] M. Chiani, *Distribution of the largest eigenvalue for real Wishart and Gaussian random
 matrices and a simple approximation for the Tracy-Widom distribution*, J. Multivariate Anal.

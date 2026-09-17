@@ -1,4 +1,4 @@
-# Contributing to The Fermion Sign Problem
+# Contributing to Entroptics Positivity
 
 ## Build and test
 

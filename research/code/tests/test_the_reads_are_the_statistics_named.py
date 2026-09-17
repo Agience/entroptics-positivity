@@ -165,3 +165,48 @@ def test_the_ceiling_does_not_depend_on_the_frame_it_is_given():
     b = float(EA.evidence_ceiling(rng.standard_normal((400, 9)) * 50.0, signs).effective_n)
     assert a == pytest.approx(b, abs=EXACT)
     assert a == pytest.approx(400 * float(signs.mean()) ** 2, abs=EXACT)
+
+
+# ── what |z| is, and what the default balance zero is ───────────────────────────────────────────
+
+@pytest.mark.parametrize("T,rho", [(200, 0.3), (200, 0.99), (2000, 0.3), (2000, 0.9),
+                                   (2000, 0.99), (20000, 0.3), (20000, 0.9), (20000, 0.99),
+                                   (500, 0.7)])
+def test_z_is_strength_times_sqrt_n_minus_one_on_a_single_column(T, rho):
+    """Section 7's `|z|` carries nothing beyond `strength` and the sample count.
+
+    The re-pairing null is centred at `strength = 0`, so `|z|` answers whether the two channels are
+    coupled at all -- not whether the deficit has left zero, which is what section 7 claims. For one
+    column pair the relation is an identity, and that is why the paper reads the deficit's claim off
+    the seed spread instead.
+
+    The negative control is the `rho` sweep: a `z` that ignored `strength` would fail every row but
+    the one it was tuned to.
+    """
+    rng = np.random.default_rng(0)
+    a = rng.standard_normal(T)
+    b = rho * a + np.sqrt(1.0 - rho ** 2) * rng.standard_normal(T)
+    c = EA.channel_alignment(a.reshape(-1, 1), b.reshape(-1, 1))
+    assert float(c.z) == pytest.approx(
+        float(c.strength) * np.sqrt(T - 1), rel=1e-9)
+
+
+@pytest.mark.parametrize("T,D,shift", [(200, 3, 0.0), (200, 4, 5.0), (2000, 6, -2.0),
+                                       (500, 2, 0.5)])
+def test_the_default_balance_zero_returns_one_whatever_the_data(T, D, shift):
+    """Section 7's control column is an identity: the default zero IS the column mean.
+
+    The residual scored against it is the centred sample's own mean, identically zero, so the
+    pvalue is exactly 1 on any data at all. The control shows that the separation in the own-zero
+    column belongs to the zero, and it is arithmetic rather than a measurement.
+
+    The negative control is `test_balance_separates_at_the_systems_own_zero`'s subject matter: with
+    the particle-hole zero supplied, the same read returns values strictly inside `(0, 1)`.
+    """
+    rng = np.random.default_rng(7)
+    s = EA.balance_at_own_zero()
+    s.register("up", entry=lambda v: np.asarray(v))
+    s.register("dn", entry=lambda v: np.asarray(v))
+    s.place("up", rng.standard_normal((T, D)) + shift)
+    s.place("dn", rng.standard_normal((T, D)) + shift)
+    assert all(float(p) == 1.0 for p in s.balance().pvalue.values())
