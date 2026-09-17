@@ -26,8 +26,12 @@ jobs:
       url: https://pypi.org/p/entroptics-positivity
     permissions:
       # A job-level `permissions:` REPLACES the workflow-level set rather than adding to it, so
-      # `contents: read` has to be repeated or checkout cannot read the repository.
-      contents: read
+      # `contents:` has to be repeated here or checkout cannot read the repository.
+      #
+      # `write`, not `read`, because the GitHub Release below is created with this token. Set to
+      # `read` on the first version of this file, which is why v0.2.1 published to PyPI and left no
+      # Release behind — the tag was there and the page was not.
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v4
@@ -80,6 +84,21 @@ jobs:
           assert abs(locked - 1.0) < 1e-9, "the exact affine relation must saturate the alignment"
           assert free < 0.5, "an unrelated pair must not saturate"
           PY
+
+      # ⭐ THE RELEASE PAGE, BEFORE THE UPLOAD. A tag is a git object; a Release is the page people
+      # actually land on from the repository, and it is where the built artifacts are attached. Six
+      # of the seven distributions in this fleet create one and this file did not, so v0.2.1 existed
+      # on PyPI and as a tag with nothing between them.
+      #
+      # Ordered ahead of the PyPI step deliberately: PyPI accepts a version exactly once, so if the
+      # upload succeeds and the Release step then fails, a re-run cannot repair it without either
+      # skipping the upload or burning another version. This way the irreversible step is last.
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: dist/*
 
       # PyPA's own action, pinned to a commit rather than a tag: a tag can be moved, and this is the
       # step that holds the publishing token.
