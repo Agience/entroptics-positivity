@@ -23,7 +23,15 @@ build-backend = "setuptools.build_meta"
 # order to ship the thing that reads them. `package-dir` below makes setuptools pick the module up
 # in place instead.
 name = "entroptics-positivity"
-version = "0.2.0"
+# ⚠ 0.2.1, NOT 0.2.0, AND THE PAPER IS STILL 0.2.0. `CITATION.cff` and `.zenodo.json` say 0.2.0 and
+# a lightweight `v0.2.0` tag already exists on the GitHub remote, pointing at the commit before this
+# packaging work — the paper's own release marker, cut before `publish.yml` existed, so it has never
+# published anything. Moving it to reach this commit would rewrite what the paper's archived version
+# refers to in order to save a version number. The distribution takes the next one instead.
+#
+# The reader and the paper do not have to share a version line, and from here they will not: this
+# number tracks the READER, and `CITATION.cff` tracks the paper.
+version = "0.2.1"
 description = "The reader from 'Reading Positivity from the Weights Alone': the paper's domain adapter over the Entroptics library."
 readme = { file = "README.md", content-type = "text/markdown" }
 # 3.10 is the floor `from __future__ import annotations` plus `X | None` in signatures needs to be
