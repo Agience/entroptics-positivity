@@ -1,0 +1,69 @@
+[build-system]
+# No `wheel`. setuptools builds a wheel through PEP 517 without it, and listing it makes a
+# `--no-isolation` build fail on a machine that has setuptools and not the shim.
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# The READER, published so a result in the paper can be reproduced by installing it rather than by
+# cloning a research repository and arranging its sys.path.
+#
+# ⛔ WHAT IS PUBLISHED IS THE ADAPTER, NOT THE RIG. `research/code` also holds the DQMC machinery
+# (`dqmc.py`, `cpmc.py`, `clangevin.py`, the 2-D models) and the experiment files that produce the
+# paper's figures. None of that ships: those are one paper's apparatus, they carry paths and
+# environment assumptions of their own, and a reader installing this wants the READS. The apparatus
+# stays in the repository, which is what the Zenodo DOI archives.
+#
+# ⚠ THE MODULE IS PACKAGED WHERE IT ALREADY LIVES, and that is deliberate rather than lazy. Moving
+# it to a `src/` package would have broken two things that are load-bearing here: 46 experiment
+# files import it as a flat sibling (`import entroptics_adapter as EA`), and
+# `tests/test_the_instrument_is_reached_through_the_adapter.py` scans `research/code` by FILENAME
+# and asserts the adapter is the only file importing the library. Both gates would have needed
+# rewriting to publish a naming layer — changing the apparatus that produced the paper's numbers in
+# order to ship the thing that reads them. `package-dir` below makes setuptools pick the module up
+# in place instead.
+name = "entroptics-positivity"
+version = "0.2.0"
+description = "The reader from 'Reading Positivity from the Weights Alone': the paper's domain adapter over the Entroptics library."
+readme = { file = "README.md", content-type = "text/markdown" }
+# 3.10 is the floor `from __future__ import annotations` plus `X | None` in signatures needs to be
+# safe, and it is under entroptics' own floor anyway — the library is what decides in practice.
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [{ name = "Ikailo Inc.", email = "connect@agience.ai" }]
+keywords = [
+    "fermion sign problem", "determinantal quantum Monte Carlo", "positivity",
+    "entroptics", "reproducibility",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Operating System :: OS Independent",
+]
+
+# ⭐ THIS LIST IS THE VERSION PIN WHEN THE MODULE IS INSTALLED. `_pinned_version()` reads
+# `research/requirements.txt` in a checkout and this metadata otherwise — the same rule ("the file
+# pip installs from") resolved against whichever file that actually is. The floor here must
+# therefore stay in step with `research/requirements.txt`, and
+# `tests/test_the_published_reader_is_installable.py` fails if the two disagree.
+#
+# `scipy` and `pytest` are in `research/requirements.txt` and NOT here: the adapter imports neither.
+# They belong to the rig, which is not what this distribution ships.
+dependencies = [
+    "numpy>=1.26",
+    "entroptics>=0.2.3",
+]
+
+[project.urls]
+Homepage = "https://agience.ai"
+Source = "https://github.com/Agience/entroptics-positivity"
+Issues = "https://github.com/Agience/entroptics-positivity/issues"
+
+[tool.setuptools]
+# One module, taken from where the rig already keeps it. `py-modules` rather than `packages`
+# because `research/code` is not a package and must not become one — it has no `__init__.py`, and
+# adding one would change how all 46 experiment files resolve their sibling imports.
+package-dir = { "" = "research/code" }
+py-modules = ["entroptics_adapter"]

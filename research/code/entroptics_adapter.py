@@ -64,18 +64,65 @@ _environment = importlib.import_module("entroptics.environment")
 _REQUIREMENTS = Path(__file__).resolve().parent.parent / "requirements.txt"
 
 
-def _pinned_version() -> str:
-    """The entroptics floor from research/requirements.txt -- the single source.
-
-    Accepts `==` or `>=`. What the number is used for here is a MINIMUM on the call surface and on
-    the read values, so both spellings answer the same question.
-    """
-    for line in _REQUIREMENTS.read_text(encoding="utf-8").splitlines():
-        stmt = line.split("#", 1)[0].strip()
+def _requirement_from(lines) -> str | None:
+    """The entroptics floor stated in `lines`, or None. Accepts `==` or `>=`."""
+    for line in lines:
+        stmt = line.split("#", 1)[0].split(";", 1)[0].replace(" ", "")
         for op in ("==", ">="):
             if stmt.startswith("entroptics" + op):
                 return stmt[len("entroptics" + op):].strip()
-    raise ImportError(f"no 'entroptics==' or 'entroptics>=' requirement found in {_REQUIREMENTS}")
+    return None
+
+
+def _pinned_version() -> str:
+    """The entroptics floor, from whichever file pip actually installed from.
+
+    ⚠ TWO CONTEXTS, ONE RULE. The rule is the one this module has always had -- read the number
+    from the file pip installs from, never repeat it here -- and which file that is depends on how
+    this module was reached:
+
+      * A REPO CHECKOUT: `research/requirements.txt`, sitting beside the rig. This is what a paper
+        rerun installs, so it is the number the paper's figures were read through.
+      * AN INSTALLED DISTRIBUTION: this package's own metadata. Once `entroptics-positivity` is on
+        PyPI, `pip install entroptics-positivity` resolves entroptics from `[project]
+        dependencies` in `pyproject.toml` -- that IS the file pip installed from, and
+        `requirements.txt` is not in the wheel at all.
+
+    ⛔ THE INSTALLED BRANCH IS WHY THIS IS NOT A ONE-LINER. `_REQUIREMENTS` is
+    `__file__.parent.parent / "requirements.txt"`, which under site-packages resolves to a path
+    that does not exist -- so before this branch existed, an installed copy of this module raised
+    at import for every user. Measured 2026-09-17 while packaging it; the repo has never hit it
+    because in a checkout the file is always there.
+
+    Both branches are kept because both are real. Hardcoding the number to serve the installed case
+    would put a second version in the tree and break the property the docstring at the top of this
+    module promises: relaxing or tightening the requirement cannot leave a stale number behind.
+    """
+    if _REQUIREMENTS.is_file():
+        found = _requirement_from(_REQUIREMENTS.read_text(encoding="utf-8").splitlines())
+        if found:
+            return found
+        raise ImportError(
+            f"no 'entroptics==' or 'entroptics>=' requirement found in {_REQUIREMENTS}")
+
+    from importlib import metadata
+
+    try:
+        declared = metadata.requires("entroptics-positivity") or ()
+    except metadata.PackageNotFoundError:
+        raise ImportError(
+            f"{_REQUIREMENTS} does not exist and `entroptics-positivity` is not installed, so the "
+            f"required entroptics version cannot be read from anywhere. This module states its "
+            f"floor in the file pip installs from; reached outside both a repo checkout and an "
+            f"install, there is no such file."
+        ) from None
+
+    found = _requirement_from(declared)
+    if found:
+        return found
+    raise ImportError(
+        "the installed `entroptics-positivity` declares no entroptics requirement — its metadata "
+        "is wrong, since this module cannot do its job without the library it adapts.")
 
 
 def _version_tuple(v: str) -> tuple:

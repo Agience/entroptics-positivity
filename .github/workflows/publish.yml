@@ -1,0 +1,90 @@
+name: publish
+# Publish the READER to PyPI when a version tag is pushed.
+#
+# What is published is `research/code/entroptics_adapter.py` and nothing else — the paper's domain
+# adapter over Entroptics, so a result can be reproduced by installing the reader rather than by
+# cloning this repository and arranging its sys.path. The DQMC apparatus and the experiment files
+# stay here; the Zenodo DOI archives those.
+#
+# Trusted Publishing (OIDC): PyPI is configured to trust this repository, this workflow file and the
+# `pypi` environment, so the job mints a short-lived token at publish time. No API token is stored
+# as a secret, which is why `id-token: write` is the only unusual permission here and why the
+# environment name below is load-bearing rather than decorative — PyPI checks it.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch: {}      # manual dry run: builds and checks, publishes nothing
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/entroptics-positivity
+    permissions:
+      # A job-level `permissions:` REPLACES the workflow-level set rather than adding to it, so
+      # `contents: read` has to be repeated or checkout cannot read the repository.
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build the distribution
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip build twine
+          python -m build --outdir dist .
+          python -m twine check dist/*
+
+      # The tag and the packaged version must agree, or the release is named one thing and installs
+      # as another. Checked before the upload, because PyPI accepts a version once and forever — a
+      # wrong number cannot be replaced, only yanked and superseded.
+      - name: The tag and the packaged version must agree
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          packaged=$(python -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          tagged="${GITHUB_REF_NAME#v}"
+          echo "tag ${tagged} / pyproject ${packaged}"
+          [ "$packaged" = "$tagged" ] || {
+            echo "::error::tag v${tagged} does not match pyproject version ${packaged}"; exit 1; }
+
+      # ⛔ THE CHECK THAT MATTERS, AND THE ONE THIS PACKAGE EXISTS TO PASS. `_pinned_version()` reads
+      # the entroptics floor from `research/requirements.txt` in a checkout and from this
+      # distribution's own metadata when installed. The installed branch CANNOT be exercised from
+      # the repository — `requirements.txt` is always present there — so it is exercised here, from
+      # a directory that has no checkout in sight. Before that branch existed an installed copy
+      # raised ImportError at import for every user, and every test in this repo still passed.
+      - name: Install it alone, outside any checkout, and read through it
+        run: |
+          set -euo pipefail
+          python -m venv /tmp/venv
+          /tmp/venv/bin/pip install --upgrade pip
+          /tmp/venv/bin/pip install dist/*.whl
+          mkdir -p /tmp/elsewhere && cd /tmp/elsewhere
+          /tmp/venv/bin/python - <<'PY'
+          import numpy as np, entroptics_adapter as EA
+          print("REQUIRED_VERSION :", EA.REQUIRED_VERSION, "(from package metadata)")
+          print("INSTALLED_VERSION:", EA.INSTALLED_VERSION)
+          rng = np.random.default_rng(0)
+          x = rng.standard_normal((200, 4))
+          locked = EA.channel_alignment(x, 3.0 * x + 7.0).strength
+          free = EA.channel_alignment(x, rng.standard_normal((200, 4))).strength
+          print("affine %.12f / unrelated %.12f" % (locked, free))
+          assert abs(locked - 1.0) < 1e-9, "the exact affine relation must saturate the alignment"
+          assert free < 0.5, "an unrelated pair must not saturate"
+          PY
+
+      # PyPA's own action, pinned to a commit rather than a tag: a tag can be moved, and this is the
+      # step that holds the publishing token.
+      - name: Publish to PyPI
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33  # v1.14.2
+        with:
+          packages-dir: dist
