@@ -12,10 +12,10 @@
 > constant, threshold or fitted parameter is supplied to any read; where a coefficient appears it
 > is derived and the derivation is checked by requiring the wrong coefficient to fail.
 >
-> **Which results use the instrument, and which do not.** Of the 47 experiments cited here, 26 read
+> **Which results use the instrument, and which do not.** Of the 54 experiments cited here, 28 read
 > through the open-source *Entroptics* instrument
 > ([github.com/Agience/entroptics](https://github.com/Agience/entroptics), version 0.2.3,
-> [doi:10.5281/zenodo.22687899](https://doi.org/10.5281/zenodo.22687899)) and 21 do not. All three
+> [doi:10.5281/zenodo.22687899](https://doi.org/10.5281/zenodo.22687899)) and 26 do not. All three
 > gates cited in the text -- the lockstep, the identity, and the conditioned frame -- are
 > instrument-free. §§3-5 derive and verify the identity and its criterion from the one-body matrix;
 > §7 reads the output with the instrument. The two sides share no code, and agree on 15 of 15
@@ -95,7 +95,7 @@ read sees two logged columns and never `K`.
 
 The read has one blind spot, and it is the same fact as its scale invariance: a wrong decoupling
 constant changes the slope, leaves the relation affine, and does not desaturate the read. The
-direct residual catches that case at `1.61`, so the two checks are complementary (§6).
+direct residual catches that case at `1.25`, so the two checks are complementary (§6).
 
 **The scope is measured, and it separates a comparison from a one-sided read.** A phase common to
 both channels is invisible to a comparison between them: systems whose negative fractions differ by
@@ -204,17 +204,21 @@ number grows like `exp(beta * bandwidth)`, and past `beta ~ 4` its eigenvalues s
 anything. This section comes first because every table after it runs at a `beta` where that
 matters.
 
-This is a measured failure. Forming `B` as the plain ordered product and
-reading its spectrum reports, at **half filling on a bipartite lattice where positivity is
-provable**:
+This is a measured failure (`reads/expBM_naive_frame_manufactures_a_sign.py`, 400 draws a beta).
+Forming `B` as the plain ordered product and reading its spectrum reports, at **half filling on a
+bipartite lattice where positivity is provable** and the true negative fraction is therefore zero:
 
 | beta | 2 | 4 | 6 | 8 |
 |---|---|---|---|---|
-| negative fraction, naive product | 0.0000 | 0.0000 | 0.0225 | **0.5075** |
+| negative fraction, naive product | 0.0000 | 0.0000 | 0.0125 | **0.2400** |
 | negative fraction, conditioned frame | 0.0000 | 0.0000 | **0.0000** | **0.0000** |
+| largest `\|1 + lambda\|`, naive | 4.4e+06 | 1.4e+12 | 6.2e+17 | **5.8e+22** |
+| largest `\|1 + lambda\|`, conditioned | 61.1 | 180.8 | 113.2 | **576.5** |
 
-with "distances to a sign flip" of 56, 1117 and 31683 for a quantity that is O(1). The naive frame
-does not merely lose precision; it manufactures the phenomenon the paper is about.
+The last two rows are why. The conditioned frame's spectrum stays within three orders across the
+whole range; the naive product's runs to `5.8e+22`, so its eigenvalues were never near a crossing
+and its sign is not a reading of one. The naive frame does not merely lose precision; it
+manufactures the phenomenon the paper is about.
 
 The conditioned frame comes from the UDT factorisation [3]. With `I + U D T = U Db M T` and
 `prod(Db) > 0`, the sign is carried entirely by `det(U) det(T) det(M)`, and `M` is bounded by
@@ -430,7 +434,7 @@ single-particle spectrum that carries no sampling noise and is computed without 
 
 | tp | tuned mu | bipartite | identity residual | signs lock | neg fraction |
 |---|---|---|---|---|---|
-| 0.00 | **-0.0000** | yes | **1.3e-12** | **1.0000** | **0.0000** |
+| 0.00 | **0.0000** | yes | **4.4e-13** | **1.0000** | **0.0000** |
 | 0.15 | 0.6000 | no | 4.25e+01 | 0.9500 | 0.0500 |
 | 0.30 | 1.1992 | no | 8.32e+01 | 0.8150 | 0.1850 |
 | 0.70 | 1.5548 | no | 1.05e+02 | 0.9200 | 0.0800 |
@@ -563,15 +567,17 @@ identity exact at `4.3e-14`, the sign deficit `0.50071` against `0.19000` unflux
 **On a two-dimensional frustrated lattice the answer depends on the size, and the criterion tracks
 it.** A periodic triangular lattice has triangles, rhombi *and* wrap-around cycles, and route B has
 to hold on all of them at once. On `4x4` the wraps are even and carry no flux, so `theta = pi/2`
-opens route B and the identity holds to `3e-13`; on `3x3` the wraps are odd and flux-free, no
-`theta` opens either route, and the identity stays broken at every flux tried. Ten rows across the
-two lattices and five fluxes, all predicted correctly.
+opens route B and the identity holds to `4.7e-13`; on `3x3` the wraps are odd and flux-free, no
+`theta` opens either route, and the best residual over five fluxes is `3.2` -- the identity stays
+broken at every one. Ten rows across the two lattices and five fluxes, all predicted correctly
+(`reads/expBO_triangular_pair.py`).
 
-*What the pair shows.* It is a statement about the **identity**. The unfluxed
-`4x4` carries a broken identity -- residual `8.7` to `14.0` -- and still shows **no negative weight
-at all** in 200 draws out to `beta = 16`, so nothing was restored there that was measurably absent.
-The `3x3` lattice does have a real sign problem, `0.4150` unfluxed and `0.1300` at `pi/2`, and the
-criterion correctly says no flux removes it. This pair extends the criterion to two dimensions and
+*What the pair shows.* It is a statement about the **identity**. The unfluxed `4x4` carries a broken
+identity -- residual `9.26` at `beta = 8`, rising to `14.59` at `beta = 16` -- and still shows **no
+negative weight at all** in 200 draws at either, so nothing was restored there that was measurably
+absent. The `3x3` lattice does have a real sign problem, `0.3500` unfluxed and `0.1351` at `pi/2`,
+and the criterion correctly says no flux removes it. This pair extends the criterion to two
+dimensions and
 shows the wrap cycles deciding the outcome; like the ladder, it is a statement about the identity
 and not about positivity, since `theta = pi/2` opens route B.
 
@@ -611,9 +617,10 @@ either route. That is the mechanism behind the next point.
 **The residual is not a severity measure** (`reads/expAB_coupling_controlled.py`). It grows
 monotonically with `tp` while the negative fraction does not: on that experiment's own draws it
 runs `0.0375`, `0.1825`, `0.0600` across `tp = 0.15, 0.30, 0.70`, rising and then falling. The
-matched-filling table above measures the same axis on its own draws and finds the same shape at
-`0.0500`, `0.1850`, `0.0800`; the two are separate samples of one quantity and agree on the
-ordering, which is the claim. The identity's failure permits the signs to differ; it does not say
+matched-filling table above (`reads/expZZ_matched_filling.py`) measures the same axis on its own
+draws and finds the same shape at `0.0500`, `0.1850`, `0.0800`; the two are separate samples of one
+quantity and agree on the ordering, which is the claim. The identity's failure permits the signs to
+differ; it does not say
 by how much they will.
 
 **The scope of this axis.** The rows above are an `if and only if` on it: at matched filling,
@@ -721,7 +728,7 @@ read is no longer needed.
 `sqrt(dtau U)` used in the discrete field -- is **not** detected: `1 - |strength|` is `-2.2e-16`,
 exactly saturated, because rescaling an affine relation leaves it affine. Scale invariance is why
 the read needs no `lambda` and why it cannot see a wrong one; the two are the same fact, and the
-direct residual catches that case at `1.61`, so the two checks are complementary. Applying the
+direct residual catches that case at `1.25`, so the two checks are complementary. Applying the
 field with one sign to both channels leaves the two determinants
 identical, so the logged difference is identically zero and the read returns **unresolved** rather
 than a departure -- a degenerate input, visible before any read is taken.
@@ -813,8 +820,9 @@ and not a finding. What it supplies is the value, on rows the comparison could n
 `concentration` reports a directional statistic and an axial one, and they differ exactly where it
 matters: an antipodal cloud reads `resultant ~ 0` and `focus ~ 1`. A real sign problem *is*
 antipodal -- the weights sit at `+-1`, on one line through the origin -- while a phase problem is
-spread around the circle. Measured, `focus` is **1.0000** on every real-weight row and `0.543` to
-`0.833` on every genuinely complex one.
+spread around the circle. Measured, `focus` is **1.0000** on every real-weight row of that
+experiment and `0.5734` to `0.7525` on its three genuinely complex ones; across the complex rows of
+§7.1's table (`reads/expAV_monomial_conjugation.py`) as well it runs `0.543` to `0.833`.
 
 `focus = 1` is rank one in the `(Re, Im)` plane, which is the statement that **a single global
 rotation makes every weight real**. The rotation is read off the cloud's own leading direction, no
@@ -825,13 +833,14 @@ exactly. Where `focus < 1` no rotation helps and the residual stays at `1.0`.
 
 **A global phase cancels.** A phase common to every configuration multiplies numerator and
 denominator of `<O> = sum(O w)/sum(w)` alike, so it cancels exactly and costs nothing. Measured:
-rotating the weights by `0.3` to `1.3`
-leaves `|<w>|` at **0.93500** throughout, unmoved.
+rotating the weights by `0.3` to `1.3` leaves the mean phase `|<u>|` at **0.93500** throughout,
+unmoved (`reads/expBN_a_global_phase_and_the_wrong_estimator.py`; `u = w/|w|`, the frame `resultant`
+is read on).
 
-It is only visible to an estimator that takes the real part. `mean(Re w)/mean(|w|)` -- which is
+It is only visible to an estimator that takes the real part. `mean(Re u)/mean(|u|)` -- which is
 correct for real weights and is the natural thing to carry over -- reads `cos(theta)` too small,
-falling from `0.93500` to `0.25011` across the same rotations, and would overstate a cost that
-goes as `1/<sgn>^2` by fourteen times. `focus` therefore identifies when the real-part estimator
+falling from `0.93500` to `0.25011` across those same rotations, and would overstate a cost that
+goes as `1/<sgn>^2` by **13.98** times. `focus` therefore identifies when the real-part estimator
 has stopped being the right one.
 
 *What that leaves.* `focus` and `resultant` answer
@@ -924,10 +933,11 @@ point, and there is one: the alignment between the two channels, read as a coupl
 `G_up[i,i](x) + G_dn[i,i](x) = 1` configuration by configuration -- verified over 2000
 configurations a row at a maximum residual of **4.9e-15** at `beta = 2`, rising to `1.2e-12` at
 `beta = 8` (`reads/expTT_order_parameter.py`) -- so the two centred channels are exact
-negatives and their coupling must read `-1`. It reads **-1.0000**, at every beta, with the
-instrument's own exact re-pairing null placing the permuted control at `|z| <= 1.7`. On the
-controlled axis of §5 it reads `-1.0000` with `tightness = 1.000`: the entire coupling in a single
-mode.
+negatives and their coupling must read `-1`. It reads **-1.0000**, at every beta
+(`reads/expQQ_coupling_vs_sign.py`), with the instrument's own exact re-pairing null placing the
+permuted control at `|z| <= 1.7` (`reads/expAL_capability_across_representations.py`). On the
+controlled axis of §5 it reads `-1.0000` with `tightness = 1.000`
+(`reads/expAB_coupling_controlled.py`): the entire coupling in a single mode.
 
 **What the deficit measures, exactly.** The read is a normalised alignment, so its deficit from
 saturation is an angle:
@@ -1004,16 +1014,17 @@ variance, the read is
 
     strength = -1 + 2r
 
-and it holds to **1e-16** across six flux-threaded rings:
+and it holds to **4.4e-16** across six flux-threaded rings
+(`reads/expBL_route_A_is_derived.py`; every row is route A only, and sign-free):
 
 | K | r | `-1 + 2r` | measured |
 |---|---|---|---|
-| ring 6, flux `pi/8` | 0.00091 | -0.99818 | **-0.99818** |
-| ring 6, flux `pi/4` | 0.00370 | -0.99259 | **-0.99259** |
-| ring 6, flux `pi/3` | 0.00674 | -0.98653 | **-0.98653** |
-| ring 8, flux `pi/4` | 0.02713 | -0.94573 | **-0.94573** |
-| ring 8, flux `pi/3` | 0.02213 | -0.95575 | **-0.95575** |
-| ring 10, flux `pi/4` | 0.00225 | -0.99549 | **-0.99549** |
+| ring 6, flux `pi/8` | 0.00091 | -0.99817 | **-0.99817** |
+| ring 6, flux `pi/4` | 0.00374 | -0.99251 | **-0.99251** |
+| ring 6, flux `pi/3` | 0.00683 | -0.98634 | **-0.98634** |
+| ring 8, flux `pi/4` | 0.02736 | -0.94529 | **-0.94529** |
+| ring 8, flux `pi/3` | 0.02215 | -0.95570 | **-0.95570** |
+| ring 10, flux `pi/4` | 0.00216 | -0.99568 | **-0.99568** |
 
 The departure from `-1` under route A is the imaginary weight of the frame, exactly; the sign
 problem is absent throughout.
@@ -1023,8 +1034,10 @@ bipartite case happens to have -- not from positivity, and not from the §4 iden
 coincide in every measurement in §§3-5 and come apart under flux.
 
 **It is readable where the average sign is not.** Both columns come from the same
-importance-sampled chains at each beta (`reads/expAN_capability_table.py`, `StableChains` gated
-against brute-force enumeration at 5e-15; `N = 8`, `U = 4`, `dtau = 0.125`, `t2 = 0.7`, `mu = 1.0`,
+importance-sampled chains at each beta (`reads/expAN_capability_table.py`; `StableChains` is
+gated against brute-force enumeration of every auxiliary field at 5e-15, which
+`reads/expQQ_coupling_vs_sign.py` states at the head of its own output; `N = 8`, `U = 4`, `dtau =
+0.125`, `t2 = 0.7`, `mu = 1.0`,
 four seeds, errors from the seed spread):
 
 | beta | `<sgn>` | coupling deficit | reproducibility | `\|z\|` |
@@ -1554,7 +1567,9 @@ reported quantity is the reweighted ratio `<O s> / <s>`, whose linearisation is
 `z_t = (O_t s_t - r s_t) / <s>` at the pooled `r`, and `z` relaxes more slowly than `s` does. The
 sign's own `tau` accounts for two thirds of the gap.
 At `N = 8`, `U = 4`, `beta = 4`, `t2 = 0.7`, `mu = 1.0` (a real sign problem at `<sgn> = 0.827`),
-against a reference built from the scatter of 128 independent replicas:
+against a reference built from the scatter of 128 independent replicas -- four seeds of 32, which
+is the run `--seeds 31 32 33 34`. The one-seed default gives the same picture more coarsely and
+different digits, so the rows below are that invocation and not the bare one:
 
 | | |
 |---|---|
@@ -1689,10 +1704,15 @@ thimble method deforms along a flow, and nothing here measures one.
 `closed/expEE_no_error_bar.py`, `closed/expJJ_seed_spread.py`). Built and gated: the analytic
 drift against a central finite difference of the complexified action at `7.4e-10` in the spin
 channel and `1.4e-09` in the charge channel, with the wrong-convention control at `0.40` and
-`0.36` (`tests/gate_main.py`). It converges to the wrong answer here -- the density is off by 2%
-at `z ~ 28` against a spin-channel control exact to `1e-4`. The uncertainty on that figure is
-estimated from reproducibility across seeds; a within-run formula and a seed-to-seed spread
-differ by more than an order of magnitude on this data, and the seed spread is the one that holds.
+`0.36` (`tests/gate_main.py`). It converges to the wrong answer here, and only in the charge
+channel. On the doped rows of `closed/expDD_cl_reads.py` the charge channel returns a density of
+`1.05095`, `1.10220` and `1.17205` against exact values of `1.03977`, `1.08089` and `1.13979` at
+`mu = 0.3, 0.6, 1.0` -- resolved at `z = 64.4`, `85.4` and `33.6` -- while the spin channel on the
+same grid returns `1.03974`, `1.08084` and `1.13987` against the same exact values, matching to
+better than `1e-4` on every row. The uncertainty on those figures is estimated from reproducibility
+across seeds; a within-run
+formula and a seed-to-seed spread differ by more than an order of magnitude on this data, and the
+seed spread is the one that holds.
 
 **9.6 The constrained path's trial wavefunction** [9, 10] (`closed/expW_trial.py`,
 `closed/expX_dial.py`, `closed/expKK_multidet_bias.py`, `closed/expLL_unfitted_trial.py`,
@@ -1707,10 +1727,15 @@ determinant**, every candidate coming in 5 to 15x worse. What blocks the route i
 determinants but that the only objective which selects them correctly is the one that needs the
 answer.
 
-*Two things make that band a band rather than a figure.* The ceiling is not monotone in `k`: at
-`U = 4` two determinants beat one by `4.4` standard errors, at `U = 12` they are *worse* by `2.7`,
-and at `U = 8` the difference is `0.68` and consistent with nothing
-(`closed/expKK_multidet_bias.py`). And the fit itself does not reproduce across processes
+*Two things make that band a band rather than a figure.* The ceiling is not monotone in `k`.
+Relative to the single-determinant walk, a run of `closed/expKK_multidet_bias.py` gives `0.970`,
+`0.379`, `0.044` at `U = 4` for `k = 2, 4, 6`, and `1.165`, `0.493`, `0.079` at `U = 8`: the second
+determinant helps at weak coupling and *hurts* at strong. Only the `U = 12` reversal clears its own
+error bars on that run -- `3.2` standard errors from the quoted biases, against `1.0` at `U = 8`
+and `0.1` at `U = 4`. A separate run gives `0.810`, `0.327`, `0.368` at `U = 4`, so the direction
+survives a re-run and the digits do not.
+
+*The fit is why.* It does not reproduce across processes
 (`closed/expBF_multidet_reproducibility.py`): three refits inside one process agree to all
 seventeen significant figures, a spread of exactly `0.0e+00`, while four separate processes return
 four distinct values spanning of order `1e-7` -- enough to move the bias by more than the walker
@@ -1747,10 +1772,13 @@ It is also a **closed door on doping**, in one line. Every diagonal matrix commu
 diagonal conjugation, so `S K S^-1` leaves `diag(K)` untouched; both routes then demand
 `K_ii = -K_ii` -- and `K_ii` is real because `K` is Hermitian -- so `diag(K) = 0` is forced. A
 chemical potential can therefore never be accommodated, by any flux, on any graph, at any size.
-Measured over 84 flux values across four graphs, the best identity residual at `mu = 0.2` is `6.4`
-and at `mu = 0.6` is `19.3`, while every one of those graphs reaches `1e-14` at `mu = 0`
-(`reads/expAO_spectral_criterion.py`). The measurement samples; the statement quantifies, so it is
-also proved -- §11, `Doping.doping_closes_both_routes`.
+Measured over 84 flux values -- rings of 5, 6, 7 and 8 sites at 21 fluxes each, a full period
+on every graph -- the best residual of all 84 is `1.776e-14` at `mu = 0`, and moving the diagonal
+takes it to `8.926` at `mu = 0.2` and `26.63` at `mu = 0.6`
+(`reads/expBK_doping_closes_every_flux.py`). Flux is the only freedom a diagonal-unitary
+conjugation has on a cycle, so sweeping it over a period sweeps everything route B could use. The
+measurement samples; the statement quantifies, so it is also proved -- §11,
+`Doping.doping_closes_both_routes`.
 
 So a construction seeking positivity away from half filling cannot get there by choosing a lattice,
 a flux or a size: the obstruction is a diagonal term, and no conjugation of this kind removes one.
@@ -1832,12 +1860,13 @@ Several of this paper's statements are algebra rather than measurement, and a fe
 supports them in the text is a sweep. A sweep over 84 flux values reports that no flux it tried
 opened a route; the claim being made is that none exists.
 
-Those statements are machine-checked in Lean 4 / Mathlib, in `research/lean/` -- 80 theorems across
-twelve modules. The development declares no axiom of its own and contains no `sorry`. Every
-theorem the table below names -- 48 of the 80 -- carries an explicit `#print axioms`, and each
-elaborates against Lean's three foundational axioms alone: `propext`, `Classical.choice`,
-`Quot.sound`. The other 32 are the supporting lemmas those theorems are built from, elaborated by
-the same build. CI checks every printed footprint against the three, and refuses a run that printed
+Those statements are machine-checked in Lean 4 / Mathlib, in `research/lean/` -- 81 theorems and
+lemmas across twelve modules. The development declares no axiom of its own and contains no
+`sorry`. Every theorem the table below names -- 48 of the 81 -- carries an explicit
+`#print axioms`, and each elaborates against Lean's three foundational axioms alone: `propext`,
+`Classical.choice`, `Quot.sound`. The other 33 are the supporting lemmas those theorems are built
+from, elaborated by the same build. CI checks every printed footprint against the three, and
+refuses a run that printed
 none, because "no axiom outside the three" and "nothing elaborated" would otherwise look the same
 to a grep. `research/code/lean_build.py` runs the build, on this machine unless a machine
 for it is configured.
@@ -1868,8 +1897,9 @@ measurement.
 **Two claims moved from measurement to proof.**
 
 The first is §10's **closed door on doping**. The text argues it in one line and then measures 84
-flux values across four graphs, reporting a best residual of `6.4` at `mu = 0.2` and `19.3` at
-`mu = 0.6`. `Doping.doping_closes_both_routes` says that for every finite lattice, every Hermitian
+flux values across four graphs, reporting a best residual of `8.926` at `mu = 0.2` and `26.63` at
+`mu = 0.6` against `1.776e-14` at `mu = 0`. `Doping.doping_closes_both_routes` says that for every
+finite lattice, every Hermitian
 `K` with zero diagonal, every non-zero `mu` and every diagonal unitary `S`, neither route is open.
 The mechanism is `conj_diagonal_eq` -- a diagonal conjugation leaves `K_ii` exactly where it was --
 and route B needs one further step, that Hermiticity makes `K_ii` real, so `K_ii = -conj(K_ii)`
@@ -2008,14 +2038,14 @@ doi:10.1103/PhysRevLett.102.131601 — the complex-Langevin route attempted in �
 [10.5281/zenodo.21273400](https://doi.org/10.5281/zenodo.21273400), which resolves to whatever the
 latest release is; every figure here was read through version 0.2.3.
 Every read is reached through `research/code/entroptics_adapter.py`, which names each one after the
-question this paper asks of it and holds the version pin. The counts below are how many of the 47
+question this paper asks of it and holds the version pin. The counts below are how many of the 54
 cited experiments call each, counted over the syntax tree rather than by matching text.
 `denoise` is listed in the appendix note below rather than here: it is reached through the adapter
 and no figure in the paper is read with it.
 
 | adapter | library read | § | calls |
 |---|---|---|---|
-| `channel_alignment` | `reads.coupling` | 7.2 | 16 |
+| `channel_alignment` | `reads.coupling` | 7.2 | 18 |
 | `weight_cloud` | `reads.concentration` | 7.1 | 2 |
 | `cloud_axes` | `reads.principal_directions` | 7.1 | 2 |
 | `evidence_ceiling`, `frame_carriage` | `carriage` | 9, 8 | 1 each |

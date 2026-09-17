@@ -90,14 +90,19 @@ FLUX_5x2 = (0.0, np.pi / 4, np.pi / 2, 3 * np.pi / 4, np.pi)
 for f in FLUX_5x2:
     CASES.append((f"5x2 lattice flux={f:.4f}", hop_flux(5, 2, phi=f)))
 
-print(f"{'case':<32}{'criterion':>11}{'identity resid':>17}{'holds':>8}   verdict")
+# The sign deficit is printed beside the residual because the two are different claims and the
+# section that uses this file makes both: the criterion decides the IDENTITY, and whether the
+# lattice also has a sign problem is a separate measurement on the same draws. Section 5's
+# triangular pair quotes the deficit, and without this column it had no file that produces it.
+print(f"{'case':<32}{'criterion':>11}{'identity resid':>17}{'holds':>8}"
+      f"{'sign deficit':>14}   verdict")
 print("-" * 82)
 agree = mismatch = 0
 bad = []
 for tag, K in CASES:
     try:
         pred = bool(criterion(K))
-        resid, _deficit = measure(K, beta=4.0, n_draw=120, seed=3)
+        resid, deficit = measure(K, beta=4.0, n_draw=120, seed=3)
         holds = resid < 1e-6
     except Exception as e:                                         # noqa: BLE001
         print(f"{tag:<32}   *** {type(e).__name__}: {str(e)[:34]}")
@@ -107,7 +112,7 @@ for tag, K in CASES:
     mismatch += (not ok)
     if not ok:
         bad.append((tag, pred, resid))
-    print(f"{tag:<32}{str(pred):>11}{resid:>17.3e}{str(holds):>8}   "
+    print(f"{tag:<32}{str(pred):>11}{resid:>17.3e}{str(holds):>8}{deficit:>14.4f}   "
           f"{'agree' if ok else '*** MISMATCH ***'}")
 
 print("-" * 82)

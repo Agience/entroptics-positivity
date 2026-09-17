@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE.md)
 [![PyPI](https://img.shields.io/pypi/v/entroptics?logo=pypi&logoColor=white&label=entroptics)](https://pypi.org/project/entroptics/)
-[![Gates](https://img.shields.io/badge/gates-16%20with%20negative%20controls-0F9D58)](#the-gates)
+[![Gates](https://img.shields.io/badge/gates-17%20with%20negative%20controls-0F9D58)](#the-gates)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Agience-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Agience)
 
 **Given only the weights a running simulation already holds — no Hamiltonian, no knowledge of the
@@ -291,7 +291,7 @@ here.
 | [`research/code/entroptics_adapter.py`](research/code/entroptics_adapter.py) | the one way in to the instrument — each read under the paper's name for it, and the version pin |
 | [`research/lean/`](research/lean) | the machine-checked algebraic core of §11 |
 
-Of the 47 experiments the paper cites, 26 read through Entroptics and 21 do not, and all three
+Of the 54 experiments the paper cites, 28 read through Entroptics and 26 do not, and all three
 gates cited in the text are instrument-free. §§3–5 derive and verify the identity and its
 criterion from the one-body matrix alone, §7 reads the same systems from their output, and the two
 share no code. They agree on 15 of 15 lattices.
@@ -309,7 +309,7 @@ statements are algebra, and a few of *those* are universally quantified — "at 
 graph", "for every exponent" — where the text supports them with a sweep. A sweep says no case it
 tried was a counterexample. It does not say none exists.
 
-Those are machine-checked in Lean 4 / Mathlib under [`research/lean/`](research/lean): 80 theorems
+Those are machine-checked in Lean 4 / Mathlib under [`research/lean/`](research/lean): 81 theorems
 across twelve modules, `sorry`-free, declaring no axiom of their own, every one elaborating against
 the three foundational axioms. They cover the model's algebra and, in `Alignment.lean`, what the
 read itself guarantees — that it is invariant to the offset and scale §4's identity carries, so the
@@ -340,7 +340,7 @@ cd research/code
 PYTHONPATH=. python tests/gate_fast.py                    # a gate, ~40 s
 PYTHONPATH=. python tests/validate.py                     # the sampler against enumeration, ~2 s
 PYTHONPATH=. python reads/expBA_oracle_superset.py        # the criterion against the identity
-PYTHONPATH=. python -m pytest tests -q                    # the suite: 495 tests
+PYTHONPATH=. python -m pytest tests -q                    # the suite: 523 tests
 ```
 
 On Windows `cmd` use `set PYTHONPATH=.` on its own line first; in PowerShell, `$env:PYTHONPATH='.'`.
@@ -350,8 +350,11 @@ measured runs on a 22-core box took **5m42s and 12m00s**, and a laptop will be s
 is skipped for want of data — every experiment here generates its own configurations from a seed.
 
 Reproducing the reads needs [entroptics](https://github.com/Agience/entroptics) 0.2.3 or later;
-the sampler, the criterion and the gates need only numpy and scipy. Seven experiments run past ten
-minutes and are meant to be run when their section is being checked, not routinely.
+the sampler, the criterion and the gates need only numpy and scipy. Nine experiments run past ten
+minutes and are meant to be run when their section is being checked, not routinely — the longest
+are `expDD_cl_reads`, `expCC_cl_fails` and `expJJ_seed_spread` at roughly an hour each, then
+`expAR_contour_2d`, `expAN_capability_table`, `expBH_perpendicular_violation` and
+`expKK_multidet_bias` at twenty to forty minutes. Everything else finishes in under ten.
 
 Two wrappers hold the question of which machine runs the expensive work, so it is answered once
 rather than in every caller. Both default to this one, so a fresh clone reproduces everything with
@@ -381,7 +384,7 @@ it looks like a result. Every gate carries a negative control that makes it able
 |---|---|---|
 | `validate.py` | the sampler's weight and propagator against brute-force enumeration of every auxiliary field — 5e-15 | fails at 3e-1 |
 | `test_lockstep.py` | at half filling the channels agree on every configuration while individually flipping | doping breaks it, and the break equals the negative fraction |
-| `test_conditioned_frame.py` | two independent routes to the sign agree; the answer does not move with the stabilisation block | the naive product reports a 50.75% negative fraction at half filling, where positivity is provable |
+| `test_conditioned_frame.py` | two independent routes to the sign agree; the answer does not move with the stabilisation block | the naive product reports a 24% negative fraction at beta = 8 on a lattice where positivity is provable |
 | `gate_fast.py` | the vectorised walker *is* the reference walker at one walker, bit for bit — 5.7e-14 | the finite-temperature Green's convention gives 3.2e+01 |
 | `gate_multi_k2.py` | multi-determinant overlap *and* energy against exact sector arithmetic — 5e-16 | the k = 1 gate alone passes over a two-body error of 6-31% |
 | `test_identity.py` | the identity, and that a *neighbouring* interaction's constant must fail it | borrowing a lambda 47% away fails by fourteen orders |
@@ -395,6 +398,7 @@ it looks like a result. Every gate carries a negative control that makes it able
 | `test_entroptics_adapter.py` | every adapter read *is* the library call it names, value for value | comparing against a different argument must fail, or the equality proves nothing |
 | `test_the_instrument_is_reached_through_the_adapter.py` | no file imports the instrument directly, over the AST rather than a regex | all five import spellings must be detected, including the dynamic one |
 | `test_the_read_has_the_proved_properties.py` | the read obeys the three properties `Alignment.lean` proves of it — offset and scale invariance, saturation exactly on affine data, the `[0, 2]` bound — each to 1e-12 | an uncentred cosine must fail the invariance, and unrelated columns must not saturate |
+| `test_the_reads_are_the_statistics_named.py` | each read IS the statistic §1.1 names it — `strength` is Pearson's r on one column, `focus` the leading orientation eigenvalue, `effective_n` Kish's ESS — each to 1e-12, and the sign never enters the coupling read | an unresolved pair must return 0 rather than a small correlation; flipping the frame must move the read; the ceiling must not be the sample size |
 
 ## No fit, no force, no constant
 
