@@ -5,6 +5,10 @@
 [![Gates](https://img.shields.io/badge/gates-17%20with%20negative%20controls-0F9D58)](#the-gates)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Agience-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Agience)
 
+The **fermion sign problem** in determinantal quantum Monte Carlo is normally diagnosed from the
+average sign — a quantity that costs `O(1/<sgn>²)` to resolve and is identically 1 until the
+problem is already large. This asks a different question:
+
 **Given only the weights a running simulation already holds — no Hamiltonian, no knowledge of the
 decoupling, and no constant chosen by the caller — what can be decided about its positivity?**
 
