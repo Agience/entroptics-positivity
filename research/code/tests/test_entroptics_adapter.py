@@ -68,8 +68,8 @@ def test_the_pin_would_refuse_an_older_reader():
     the comparison the refusal is made of, at a version below the pin.
     """
     assert A._version_tuple("0.2.1") < A._version_tuple(A.REQUIRED_VERSION)
-    assert A._version_tuple(A.REQUIRED_VERSION) >= A._version_tuple("0.2.3"), \
-        "the paper's numbers were read through 0.2.3; the pin must not fall below it"
+    assert A._version_tuple(A.REQUIRED_VERSION) >= A._version_tuple("0.2.10"), \
+        "the paper's numbers were read through 0.2.10; the pin must not fall below it"
 
 
 # ---------------------------------------------------------------------------------------------
@@ -187,9 +187,8 @@ def test_denoise_is_aperture_extract_and_returns_W_s_own_units():
     clean, info = A.denoise(W)
     clean_ref, info_ref = E.Aperture(W).extract()
     assert np.array_equal(np.asarray(clean), np.asarray(clean_ref))
-    # No rescaling, checked on a frame with nothing resolvable: there the shrunk projection is
-    # empty, so `clean.mean(axis=0)` is the centre. On a frame carrying structure the two
-    # differ, which is section 9.7's result.
+    # No rescaling: `clean.mean(axis=0)` is the centre, because the resolved part carries no
+    # mean. `test_extract_is_not_a_mean_estimator.py` checks the same on frames with structure.
     assert np.allclose(np.asarray(clean).mean(axis=0), np.asarray(info["centre"]), atol=1e-9)
     assert np.allclose(np.asarray(info["centre"]), np.asarray(info_ref["centre"]))
 

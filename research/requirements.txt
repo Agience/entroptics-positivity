@@ -1,4 +1,4 @@
 numpy>=1.26
 scipy>=1.11
-entroptics>=0.2.3
+entroptics>=0.2.10
 pytest>=8.0

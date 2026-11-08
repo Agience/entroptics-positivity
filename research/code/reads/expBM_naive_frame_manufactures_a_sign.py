@@ -26,11 +26,20 @@ disagree for reasons unrelated to the arithmetic.
 """
 from __future__ import annotations
 
+import importlib.util
+import pathlib
+
 import numpy as np
 
 from model2d import Model2D
 from stable import core_matrix, udt_product
-from tests.test_conditioned_frame import naive_sign, stable_signs
+
+# The gate file, loaded by path: a bare `tests` package can resolve to an installed one.
+_GATE = pathlib.Path(__file__).resolve().parents[1] / "tests" / "test_conditioned_frame.py"
+_spec = importlib.util.spec_from_file_location("conditioned_frame_gate", _GATE)
+_gate = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_gate)
+naive_sign, stable_signs = _gate.naive_sign, _gate.stable_signs
 
 U, DTAU, N_DRAW, SEED = 4.0, 0.125, 400, 2
 BETAS = (2.0, 4.0, 6.0, 8.0)

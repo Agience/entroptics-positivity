@@ -17,8 +17,8 @@
 >
 > **Which results use the instrument, and which do not.** Of the 54 experiments cited here, 28 read
 > through the open-source *Entroptics* instrument
-> ([github.com/Agience/entroptics](https://github.com/Agience/entroptics), version 0.2.3,
-> [doi:10.5281/zenodo.22687899](https://doi.org/10.5281/zenodo.22687899)) and 26 do not. All three
+> ([github.com/Agience/entroptics](https://github.com/Agience/entroptics), version 0.2.10,
+> [doi:10.5281/zenodo.24063501](https://doi.org/10.5281/zenodo.24063501)) and 26 do not. All three
 > checks the argument rests on -- the lockstep, the identity, and the conditioned frame -- are
 > instrument-free. §§3-5 derive and verify the identity and its criterion from the one-body matrix;
 > §7 reads the output with the instrument. Neither side is given the other's input -- the read never
@@ -804,7 +804,7 @@ table, so the deficits are not the same numbers):
 | lattice | §4 identity residual | `focus` | `\|Im\|` after de-rotation | sign deficit |
 |---|---|---|---|---|
 | ring 5, flux `pi/2` | `2.04e-14` | 0.75254 | 1.000 | 0.10998 |
-| ring 7, flux `pi/2` | `2.22e-14` | 0.83339 | 0.999 | 0.08482 |
+| ring 7, flux `pi/2` | `2.22e-14` | 0.83339 | 1.000 | 0.08482 |
 | tri ladder 6, flux `pi/2` | `2.13e-14` | 0.54294 | 1.000 | 0.31001 |
 | tri ladder 8, flux `pi/2` | `3.91e-14` | 0.57340 | 1.000 | 0.36442 |
 
@@ -1368,7 +1368,7 @@ alignment is not purely real and the signed real part is not the whole of it; bu
 unsaturated reading is not a magnitude hidden behind a sign. Asking the instrument for the
 directions itself,
 via `principal_directions` on channel A, does **not** recover the split: the per-direction couplings
-come out `-0.462, +0.854` and `-0.509, --, +0.232`, not `+1` and `-1`. Those are the directions of
+come out `-0.462, +0.854, +0.884` and `-0.509, --, +0.232`, not `+1` and `-1`. Those are the directions of
 A's own variance, not the eigendirections of the A-to-B relation. So the blockwise saturation of the
 previous table was recovered using knowledge of the mechanism, and a mechanism-agnostic application
 of this read stays unsaturated.
@@ -1561,15 +1561,15 @@ populations, and they answer differently.
 *Along one lattice's flux sweep.* Threading the frustrated ladder through a full period takes the
 sign deficit `0.07000` up to `0.46508` at `pi/2` and back to `0.07000`, so a read that carried the
 sign has to turn round with it. Over those eleven points the deficit tracks itself across seeds at
-`rho = +0.973`. `phase` returns `+0.159` at `p = 0.640` -- no relation. `attenuation`, `top_share`
-and `dominance` return `-0.661`, `-0.770` and `-0.770`, so they do move with the deficit on this
-lattice, at well under its own reproducibility.
+`rho = +0.973`. `phase` returns `+0.159` at `p = 0.640` -- no relation. `top_share` and
+`dominance` both return `-0.770` at `p = 0.006`, so they do move with the deficit on this lattice,
+at well under its own reproducibility; `attenuation` returns `-0.542` at `p = 0.085`.
 
 *Across lattices.* That ordering does not survive the change of population. On **eighteen**
 lattices running from sign-free to a deficit of `0.46508` -- clean `2x4` and `2x6`, open and
 periodic chains, a star, four flux-threaded rings, four staggered amplitudes, a doped cell, a
 next-nearest-hopping cell, and two odd rings and a ladder at `pi/2` -- no single-channel read orders
-them: `phase` `+0.273`, `attenuation` `+0.007`, `top_share` `+0.017`, `dominance` `-0.017`, every
+them: `phase` `+0.273`, `attenuation` `-0.060`, `top_share` `+0.017`, `dominance` `-0.017`, every
 one at `p >= 0.272`.
 
 *And that null has power.* At `n = 18` a rank correlation of `|rho| >= 0.468` would reach
@@ -1889,11 +1889,11 @@ Several of this paper's statements are algebra rather than measurement, and a fe
 supports them in the text is a sweep. A sweep over 84 flux values reports that no flux it tried
 opened a route; the claim being made is that none exists.
 
-Those statements are machine-checked in Lean 4 / Mathlib, in `research/lean/` -- 81 theorems and
+Those statements are machine-checked in Lean 4 / Mathlib, in `research/lean/` -- 80 theorems and
 lemmas across twelve modules. The development declares no axiom of its own and contains no
-`sorry`. Every theorem the table below names -- 48 of the 81 -- carries an explicit
+`sorry`. Every theorem the table below names -- 48 of the 80 -- carries an explicit
 `#print axioms`, and each elaborates against Lean's three foundational axioms alone: `propext`,
-`Classical.choice`, `Quot.sound`. The other 33 are the supporting lemmas those theorems are built
+`Classical.choice`, `Quot.sound`. The other 32 are the supporting lemmas those theorems are built
 from, elaborated by the same build. The footprint is emitted while a declaration elaborates, so it
 is a property of the proof and not a claim made about it.
 
@@ -2060,10 +2060,10 @@ doi:10.1103/PhysRevLett.102.131601 — the complex-Langevin route attempted in �
 
 **The instrument.**
 
-[E] Entroptics, version 0.2.3, [doi:10.5281/zenodo.22687899](https://doi.org/10.5281/zenodo.22687899)
-(released 2026-09-09). That is the version DOI, not the concept DOI
-[10.5281/zenodo.21273400](https://doi.org/10.5281/zenodo.21273400), which resolves to whatever the
-latest release is; every figure here was read through version 0.2.3.
+[E] Entroptics, version 0.2.10 (released 2026-11-08), version DOI
+[10.5281/zenodo.24063501](https://doi.org/10.5281/zenodo.24063501); the concept DOI
+[10.5281/zenodo.21273400](https://doi.org/10.5281/zenodo.21273400) resolves to the latest release.
+Every figure here was read through version 0.2.10.
 Every read is reached through `research/code/entroptics_adapter.py`, which names each one after the
 question this paper asks of it. The counts below are how many of the 54 cited experiments call
 each. `denoise` is listed in the note below rather than here, because no figure in this paper is
@@ -2089,8 +2089,9 @@ the external reference is [14].
 
 One read is named above and used by no figure here. `denoise` (`Aperture.extract`) was scored as
 an estimator of a mean in `reads/expRR_natural_noise.py` and is the wrong tool for this problem:
-optimal shrinkage recovers a low-rank signal and biases a mean, and the sign problem's difficulty
-is entirely in a mean.
+it splits a frame losslessly into its resolved modes and a residual, and the resolved modes carry
+no mean, so the mean it returns is the raw block mean to round-off; the sign problem's difficulty
+is entirely in that mean.
 
 [14] M. Chiani, *Distribution of the largest eigenvalue for real Wishart and Gaussian random
 matrices and a simple approximation for the Tracy-Widom distribution*, J. Multivariate Anal.

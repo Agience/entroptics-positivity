@@ -116,8 +116,7 @@ if __name__ == "__main__":
             dets = build_basis(m.K, Lx, Ly, nu, nd, hs)
             e_noci, c = noci(dets, m.K, U)
             k = len(dets)
-            ov = trial_overlap({+1: dets[0][+1], -1: dets[0][-1]}, m.K, U, nu, nd) if k == 1 else \
-                _multi_overlap(dets, c, m, nu, nd) if False else None
+            ov = trial_overlap({+1: dets[0][+1], -1: dets[0][-1]}, m.K, U, nu, nd) if k == 1 else None
             rs = [run_multi(m, nu, nd, dets, c, beta, n_walkers=400, seed=s, n_meas=150)
                   for s in (1, 2, 3)]
             e = np.array([r["e"] for r in rs])

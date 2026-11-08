@@ -1,18 +1,21 @@
 """S8.7, gated: `extract` against the raw block mean, and the file that measures it must RUN.
 
 This test exists because §9.7 was quoted from an experiment nothing gated, and the experiment
-could not execute at all against the current library -- `E.aperture` is the module, not the class,
-and `extract()` returns `(clean, info)` rather than an object with a `.clean`. Two API breaks and a
+could not execute at all against the library -- `E.aperture` is the module, not the class, and
+`extract()` returns `(clean, info)` rather than an object with a `.clean`. Two API breaks and a
 figure taken from the single worst row all survived because no gate ever imported this file.
 
-WHAT IS AND IS NOT CLAIMED. `extract` is roughly a WASH with the raw block mean here, with a tail
-the wrong way -- it loses on most rows and wins on some. A test asserting "extract is worse" would
-be asserting something the data does not support, so the shape asserted is the one measured: the
-ratio brackets 1 from both sides, and its median sits above 1.
+WHAT IS CLAIMED. `extract` is lossless: `clean` is each channel's mean plus the frame's resolved
+modes, and the whitening centres every channel before the modes are read, so the resolved part has
+no mean over the rows. `clean.mean(axis=0)` is therefore the raw block mean, and as an estimator of
+a mean `extract` returns exactly what the raw mean returns. It adds nothing to the quantity the sign
+problem lives in, which is why the paper names it and uses it for no figure.
 
 The scoring uses no chosen level anywhere. Every comparison is against the raw block mean computed
-from the SAME blocks, and `1.0` is not a threshold -- it is the definitional value of a ratio of
-two errors that are equal.
+from the SAME blocks, and every bound is the round-off of the arithmetic that formed the two
+numbers compared: a mean over `n` rows rounds by at most `n * eps * max|W|`, and two RMS errors
+against one truth whose means agree to that differ by no more than it (the triangle inequality),
+plus the round-off of each RMS over its `L` lags.
 """
 from __future__ import annotations
 
@@ -20,6 +23,8 @@ import numpy as np
 import pytest
 
 from functools import lru_cache
+
+EPS = float(np.finfo(np.float64).eps)
 
 
 @lru_cache(maxsize=None)
@@ -43,8 +48,15 @@ def grid():
                             raw=e_raw, ext=e_ext, ratio=e_ext / e_raw,
                             clean_mean=clean.mean(axis=0),
                             centre=np.asarray(info["centre"]),
-                            w_mean=W.mean(axis=0)))
+                            w_mean=W.mean(axis=0),
+                            rows=int(W.shape[0]),
+                            peak=float(max(np.abs(W).max(), np.abs(clean).max()))))
     return tuple(out)
+
+
+def _mean_roundoff(r) -> float:
+    """The round-off a mean over the frame's rows can carry, at the frame's own magnitude."""
+    return r["rows"] * EPS * r["peak"]
 
 
 def test_the_experiment_behind_section_8_7_actually_runs():
@@ -59,37 +71,38 @@ def test_the_experiment_behind_section_8_7_actually_runs():
     assert all(np.isfinite(r["ratio"]) for r in rows), "a row failed to produce a ratio"
 
 
-def test_extract_is_a_wash_with_the_raw_mean_and_is_not_uniformly_worse():
-    """The measured SHAPE, and it is not the one an earlier draft quoted.
-
-    A single worst row (`1.637`) was quoted as the result. Asserted here instead: the ratio
-    brackets 1 -- some rows above, at least one below -- so no draft can restate this as a
-    uniform loss, and none can restate it as a win either.
-    """
-    ratios = [r["ratio"] for r in grid()]
-    assert max(ratios) > 1.0, f"extract no longer loses on any row: {ratios}"
-    assert min(ratios) < 1.0, \
-        f"extract no longer beats the raw mean on any row -- S8.7 says it does on two of nine, " \
-        f"and if that has changed the section needs re-measuring: {ratios}"
-    assert float(np.median(ratios)) > 1.0, \
-        f"the median ratio no longer sits above 1: {sorted(round(v, 3) for v in ratios)}"
-
-
-def test_clean_carries_a_mean_of_its_own():
+def test_clean_carries_the_raw_mean():
     """WHY it is not a mean estimator, asserted rather than asserted-about.
 
-    An earlier draft explained the loss by saying the mean lives in `info['centre']` and `clean`
-    carries only the deviations. That is not what the library returns: `clean` comes back in W's
-    own units carrying a mean, and shrinkage has moved it off BOTH the raw mean and `centre`.
+    `clean` comes back in W's own units, and its mean over the rows is the raw block mean and the
+    read's own `centre`, both to the round-off of a mean. The resolved modes carry no mean, so
+    nothing `extract` resolves can move the estimate.
     """
     for r in grid():
+        tol = _mean_roundoff(r)
         off_raw = float(np.abs(r["clean_mean"] - r["w_mean"]).max())
         off_centre = float(np.abs(r["clean_mean"] - r["centre"]).max())
-        assert off_raw > 0.0, \
-            f"clean's mean is the raw mean, so shrinkage did nothing at per_block={r['per_block']}"
-        # Not asserted equal to `centre` either -- pinned so the withdrawn explanation cannot
-        # come back on the strength of the two being close.
-        assert off_centre >= 0.0 and np.isfinite(off_centre)
+        assert off_raw <= tol, \
+            f"clean's mean left the raw mean by {off_raw:.2e} (round-off {tol:.2e}) at " \
+            f"per_block={r['per_block']}: the resolved part now carries a mean, and S8.7 needs " \
+            f"re-measuring"
+        assert off_centre <= tol, \
+            f"clean's mean left the read's centre by {off_centre:.2e} (round-off {tol:.2e}) at " \
+            f"per_block={r['per_block']}"
+
+
+def test_extract_scores_exactly_as_the_raw_mean_does():
+    """The consequence for the estimate: on every row the two errors agree to the round-off.
+
+    Not a wash and not a tail either way. An earlier library shrank the resolved modes and moved
+    the mean, and this section then read a ratio bracketing 1; that is withdrawn.
+    """
+    for r in grid():
+        L = r["w_mean"].size
+        bound = _mean_roundoff(r) + L * EPS * max(r["raw"], r["ext"])
+        assert abs(r["ext"] - r["raw"]) <= bound, \
+            f"extract's error {r['ext']:.6e} and the raw mean's {r['raw']:.6e} differ by more " \
+            f"than round-off ({bound:.2e}) at per_block={r['per_block']}"
 
 
 @pytest.mark.parametrize("row", range(9))

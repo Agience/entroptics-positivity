@@ -348,7 +348,7 @@ def single_channel_optics(data, **kw):
     configuration and compares no channels, so it was measured
     (`reads/expBG_single_channel_has_no_indicator.py`). Across eighteen lattices spanning sign-free
     to a sign deficit of 0.46508, no read here orders them by it -- `phase` +0.273, `attenuation`
-    +0.007, `top_share` +0.017, `dominance` -0.017, all at p >= 0.272, where |rho| >= 0.468 would
+    -0.060, `top_share` +0.017, `dominance` -0.017, all at p >= 0.272, where |rho| >= 0.468 would
     have reached p < 0.05 at that n. `attenuation` ranges further among the ten sign-free lattices
     alone (0.05161 to 0.79089) than between them and any lattice there with a sign problem.
 
@@ -364,15 +364,17 @@ def single_channel_optics(data, **kw):
 
 
 def denoise(W, **kw):
-    """Optimal shrinkage on a weight frame -- section 9.7, where it is the wrong tool.
+    """The lossless split of a weight frame into resolved modes and residual -- section 9.7, where
+    it is the wrong tool.
 
-    `extract` recovers a low-rank signal and biases a mean, and the sign problem's difficulty is
-    entirely in a mean. Kept in the adapter so a reader can run the attempt the paper reports.
+    `extract` separates a low-rank signal from the rest, and the sign problem's difficulty is
+    entirely in a mean, which the split leaves where it was. Kept in the adapter so a reader can run
+    the attempt the paper reports.
 
     Returns `(clean, info)` with `clean` in `W`'s own units, so the caller applies no rescaling.
-    `clean` is `info['centre']` plus a shrunk projection onto the resolved modes: where nothing is
-    resolvable that projection is empty and `clean.mean(axis=0)` is the centre, and where modes are
-    resolved the projection carries a mean of its own and the two differ (section 9.7 measures the
-    gap at `6.0e-05` to `1.3e-02`).
+    `clean` is `info['centre']` (each channel's mean) plus the projection onto the resolved modes.
+    The whitening centres every channel before the modes are read, so that projection has no mean
+    over the rows, and `clean.mean(axis=0)` is the centre and the raw frame mean to round-off
+    (`tests/test_extract_is_not_a_mean_estimator.py`).
     """
     return _lib.Aperture(np.asarray(W), **kw).extract()

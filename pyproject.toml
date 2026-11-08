@@ -31,7 +31,7 @@ name = "entroptics-positivity"
 #
 # The reader and the paper do not have to share a version line, and from here they will not: this
 # number tracks the READER, and `CITATION.cff` tracks the paper.
-version = "0.2.1"
+version = "0.2.2"
 description = "The reader from 'Reading Positivity from the Weights Alone': the paper's domain adapter over the Entroptics library."
 readme = { file = "README.md", content-type = "text/markdown" }
 # 3.10 is the floor `from __future__ import annotations` plus `X | None` in signatures needs to be
@@ -61,7 +61,7 @@ classifiers = [
 # They belong to the rig, which is not what this distribution ships.
 dependencies = [
     "numpy>=1.26",
-    "entroptics>=0.2.3",
+    "entroptics>=0.2.10",
 ]
 
 [project.urls]

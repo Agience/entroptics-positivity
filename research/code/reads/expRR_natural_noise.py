@@ -104,13 +104,11 @@ if __name__ == "__main__":
             # `extract` returns `(clean, info)` with `clean` in W's own units, so it is used as
             # returned.
             rec = clean
-            # `clean.mean(axis=0)` matches neither the frame mean nor the read's own centre on
-            # these rows. `clean` is the centre plus a shrunk projection onto the resolved modes,
-            # and that projection carries a mean of its own wherever there is structure to resolve.
-            # On a frame with nothing resolvable the projection is empty and `clean.mean` is the
-            # centre to 3e-16, so a check on Gaussian frames reads the two as equal and cannot see
-            # this. These frames carry a correlator. Both gaps are collected, so section 9.7's
-            # claim is a measurement on the data it is about.
+            # `clean` is the centre plus the projection onto the resolved modes. The whitening
+            # centres every channel before the modes are read, so the projection has no mean and
+            # `clean.mean(axis=0)` is both the frame mean and the read's centre to round-off. These
+            # frames carry a correlator, so modes are resolved on them; both gaps are collected,
+            # so section 9.7's claim is a measurement on the data it is about.
             CENTRE_GAP.append(float(np.abs(rec.mean(axis=0) - np.asarray(info["centre"])).max()))
             FRAME_GAP.append(float(np.abs(rec.mean(axis=0) - W.mean(axis=0)).max()))
             e_raw = float(np.sqrt(np.mean((raw - truth) ** 2)))
@@ -126,17 +124,16 @@ if __name__ == "__main__":
     print(f"  |clean.mean(axis=0) - info['centre']|   {min(CENTRE_GAP):.1e} to {max(CENTRE_GAP):.1e}")
     print(f"  |clean.mean(axis=0) - W.mean(axis=0)|   {min(FRAME_GAP):.1e} to {max(FRAME_GAP):.1e}")
     print()
-    print("  `clean` is neither: it is the centre plus a SHRUNK projection onto the resolved")
-    print("  modes, and that projection carries a mean of its own wherever there is structure to")
-    print("  resolve.  On a frame with nothing resolvable the projection is empty and the first")
-    print("  row above would read 3e-16 -- which is what a check on Gaussian noise returns, and")
-    print("  why that check cannot stand in for this one.")
+    print("  Both gaps are round-off: `clean` is the centre plus the projection onto the resolved")
+    print("  modes, and the whitening centres every channel before the modes are read, so the")
+    print("  projection carries no mean.  As an estimator of a mean, `extract` returns the raw")
+    print("  block mean exactly, and the two error columns above agree to round-off.")
     print()
-    print("  Optimal singular-value shrinkage is the right operation for recovering a low-rank")
-    print("  signal and the wrong one for an unbiased mean: it shrinks the mean-carrying mode")
-    print("  along with everything else.  That is why section 9.7 reports `extract` as the wrong")
-    print("  tool for this problem -- not because it misreports itself, but because the quantity")
-    print("  it faithfully reports is not the one a sign problem lives in.")
+    print("  The split into resolved modes and residual is the right operation for recovering a")
+    print("  low-rank signal and adds nothing to a mean, which it leaves where it was.  That is")
+    print("  why section 9.7 reports `extract` as the wrong tool for this problem -- not because")
+    print("  it misreports itself, but because the quantity it separates is not the one a sign")
+    print("  problem lives in.")
     print()
     print("'ratio' below 1 is the read beating the raw block mean.  Part 1 found a constant")
     print("factor that turned into a LOSS at high statistics; if the unnatural noise was the")
