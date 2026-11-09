@@ -4,7 +4,7 @@
 
 **Ikailo John Sessford**, Ikailo Inc., `john@ikailo.com`
 
-*Version 0.2.0. September 2026.*
+*Version 0.2.3. November 2026.*
 
 > **A note on measurement.** Every empirical quantity in this paper is a deterministic read of a
 > configuration produced by the determinantal quantum Monte Carlo sampler in `research/code/`. The

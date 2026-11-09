@@ -24,7 +24,7 @@ build-backend = "setuptools.build_meta"
 # in place instead.
 name = "entroptics-positivity"
 # One version line for the reader and the paper: `CITATION.cff` and `.zenodo.json` carry this number.
-version = "0.2.2"
+version = "0.2.3"
 description = "The reader from 'Reading Positivity from the Weights Alone': the paper's domain adapter over the Entroptics library."
 readme = { file = "README.md", content-type = "text/markdown" }
 # 3.10 is the floor `from __future__ import annotations` plus `X | None` in signatures needs to be

@@ -5,6 +5,8 @@
 [![Gates](https://img.shields.io/badge/gates-17%20with%20negative%20controls-0F9D58)](#the-gates)
 [![Sponsor](https://img.shields.io/badge/Sponsor-Agience-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Agience)
 
+Paper: [research/PAPER.pdf](https://github.com/Agience/entroptics-positivity/blob/main/research/PAPER.pdf) (two-column; LaTeX source in [research/PAPER.tex](https://github.com/Agience/entroptics-positivity/blob/main/research/PAPER.tex), Markdown in [research/PAPER.md](https://github.com/Agience/entroptics-positivity/blob/main/research/PAPER.md)).
+
 The fermion sign problem in determinantal quantum Monte Carlo is normally diagnosed from the
 average sign — a quantity that costs `O(1/<sgn>²)` to resolve and is identically 1 until the
 problem is already large. This asks a different question:

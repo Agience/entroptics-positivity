@@ -20,8 +20,8 @@ identifiers:
     value: "10.5281/zenodo.24063943"
     description: "Version DOI - Entroptics Positivity 0.2.2."
 license: Apache-2.0
-version: 0.2.2
-date-released: "2026-11-08"
+version: 0.2.3
+date-released: "2026-11-09"
 keywords:
   - fermion sign problem
   - determinantal quantum Monte Carlo
