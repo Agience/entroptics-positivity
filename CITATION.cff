@@ -11,9 +11,17 @@ authors:
     orcid: "https://orcid.org/0009-0002-0150-4027"
 repository-code: "https://github.com/Agience/entroptics-positivity"
 url: "https://github.com/Agience/entroptics-positivity"
+doi: "10.5281/zenodo.22803898"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.22803898"
+    description: "Concept DOI - resolves to the latest version of Entroptics Positivity."
+  - type: doi
+    value: "10.5281/zenodo.24063943"
+    description: "Version DOI - Entroptics Positivity 0.2.2."
 license: Apache-2.0
-version: 0.2.0
-date-released: "2026-09-16"
+version: 0.2.2
+date-released: "2026-11-08"
 keywords:
   - fermion sign problem
   - determinantal quantum Monte Carlo
