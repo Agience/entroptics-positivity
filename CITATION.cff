@@ -17,8 +17,8 @@ identifiers:
     value: "10.5281/zenodo.22803898"
     description: "Concept DOI - resolves to the latest version of Entroptics Positivity."
   - type: doi
-    value: "10.5281/zenodo.24063943"
-    description: "Version DOI - Entroptics Positivity 0.2.2."
+    value: "10.5281/zenodo.24071371"
+    description: "Version DOI - Entroptics Positivity 0.2.3."
 license: Apache-2.0
 version: 0.2.3
 date-released: "2026-11-09"
